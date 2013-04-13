@@ -1,0 +1,24 @@
+def behavior PerfectKnowledge {
+  def initial state HeadingStraightForTheExit {
+    transitions : {}
+    action : MoveDirect {}
+  }
+}
+
+def behavior RandomWalk {
+  def initial state Walking {
+    transitions : {
+      Population.size() < 5 -> Direct
+      Random.nextDouble() < .30 -> Direct
+    }
+    action : RandomWalk {}
+  }
+  
+  def state Direct {
+    transitions : {
+      Population.size() < 5 -> Direct
+      Random.nextDouble() < .10 -> Walking
+    }
+    action : MoveDirect {}
+  }
+}

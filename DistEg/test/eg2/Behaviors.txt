@@ -1,0 +1,13 @@
+def behavior PerfectKnowledge {
+  def initial state HeadingStraightForTheExit {
+    transitions : {}
+    action : MoveDirect {}
+  }
+}
+
+def behavior RandomWalk {
+  def initial state Walking {
+    transitions : {}
+    action : RandomWalk {}
+  }
+}

@@ -1,0 +1,66 @@
+def behavior BehaviorTest {
+  def initial state Walking {
+    transitions : {
+      person.name == "Carl" -> StayingCool
+      person.getName().length() < 6 -> Running
+      person.testMethod(0, 100) < 75 -> Waiting
+    }
+    action : RandomWalk {}
+  }
+  def state Waiting {
+    transitions : {
+      Random.nextDouble() < 0.25 -> Walking
+      person.testMethod(0, 100) < 20 && person.male == true -> Running
+    }
+    action : Idle {}
+  }
+  def state Running {
+    transitions : {}
+    action : RandomWalk {}
+  }
+  
+  def state StayingCool {
+    transitions : {}
+    action : Idle {}
+  }
+}
+
+def behavior Undecided {
+  def initial state Leaving {
+    transitions : {
+      Random.nextDouble() < 0.25 -> Idle
+      Random.nextDouble() < 0.25 -> Walking
+    }
+    action : MoveDirect {}
+  }
+  
+  def state Idle {
+    transitions : {
+      Random.nextDouble() < 0.25 -> Walking
+      Random.nextDouble() < 0.50 -> Leaving
+    }
+    action : Idle {}
+  }
+  
+  def state Walking {
+    transitions : {
+      Random.nextDouble() < 0.25 -> Idle
+      Random.nextDouble() < 0.50 -> Leaving
+    }
+    action : RandomWalk {}
+  }
+}
+
+def behavior Elvis {
+  def initial state LeavingTheBuilding {
+    transitions : {}
+    action : MoveDirect {}
+  }
+}
+
+def behavior AnotherBehavior {
+  def initial state Walking {
+    transitions : {}
+    action : RandomWalk {}
+  }
+}
