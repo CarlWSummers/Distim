@@ -1,0 +1,39 @@
+Area Area1 {
+
+  Wall {
+    polygon (0,0),(0, 100),(100, 100), (100, 0)
+  }
+
+  Transition {
+    t1
+    circle 
+      center : (300,400)
+      radius : 50
+    transition to Area2 t1
+  }
+}
+
+Area Area2 {
+  Wall {
+    rectangle upper left (100,200) to lower right (105,300)
+  }
+  Wall {
+    rectangle starting at (3,4) with width 4 and height 5
+  }
+
+  Exit {
+    circle
+      center : (3,4)
+      radius : 4
+  }
+
+  Transition {
+    t1
+    circle 
+      center : (103,100)
+      radius : 15
+    transition to Area1 t1
+  }
+}
+
+
