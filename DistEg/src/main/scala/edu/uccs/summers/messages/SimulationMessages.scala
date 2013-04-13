@@ -6,5 +6,5 @@ sealed trait SimulationMessage
 case class Initialize(init : SimulationInitData) extends SimulationMessage
 
 sealed trait SimulationInitializationResult extends SimulationMessage
-case class InitSuccessful extends SimulationInitializationResult
+case object InitSuccessful extends SimulationInitializationResult
 case class InitFailed(reason : String) extends SimulationInitializationResult

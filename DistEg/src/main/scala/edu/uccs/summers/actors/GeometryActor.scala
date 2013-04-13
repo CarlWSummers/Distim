@@ -1,7 +1,6 @@
 package edu.uccs.summers.actors
 
 import akka.actor.Actor
-import edu.uccs.summers.messages.PiApproximation
 import edu.uccs.summers.messages.Initialize
 import edu.uccs.summers.data.SimulationInitData
 import edu.uccs.summers.messages.InitFailed
