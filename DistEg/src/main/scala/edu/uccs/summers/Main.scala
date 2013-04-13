@@ -43,6 +43,7 @@ import edu.uccs.summers.data.behaviors.Idle
 import edu.uccs.summers.data.behaviors.MoveDirect
 import com.typesafe.config.ConfigFactory
 import java.awt.Rectangle
+import edu.uccs.summers.actors.SimulationMaster
 
 object Main extends SimpleSwingApplication{
   
@@ -64,19 +65,19 @@ object Main extends SimpleSwingApplication{
     }
     case e => 
       println("Failed to parse Behaviors File:" + e)
-      sys.exit
+      exit
   } 
   
   val topo = new Topography(base + "topography.txt")
+  val geometry = new Geometry(base + "geometry.txt")
   val popActor = system.actorOf(Props(new Population(base + "population.json", topo, behaviors toMap)), name = "master")
+  
+  val simulationMaster = system.actorOf(Props(new SimulationMaster))
+  
   var pop = null : Population
   var tickCount = 0
   
   lazy val ui = new Panel {
-    private var _gridSize = 10
-    private var minGridSize = 2;
-    private var maxGridSize = 22;
-    
     var drawMouseCoords = false
     var drawPersonLabel = true;
     var mouseX = 0;
@@ -84,86 +85,20 @@ object Main extends SimpleSwingApplication{
     var translateX = 0.0;
     var translateY = 0.0;
     
+    var scaleFactor = 1.0;
+    
     focusable = true
     opaque = true
-
     preferredSize = new Dimension(800, 800)
-    background = new Color(25, 99, 40)
+    
     override def paintComponent(g : Graphics2D) = {
-      super.paintComponent(g)
-      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-      g.setFont(new Font("Serif", Font.PLAIN, 12));
-      g.setColor(Color.LIGHT_GRAY)
-      g.drawString("Tick Count: " + tickCount, 0, size.height - 14)
-      g.drawString("Pop Count : " + (if (pop != null) pop.size else "-"), 0, size.height - 2)
-
-      font = new Font("Serif", Font.PLAIN, 24 - (maxGridSize - _gridSize));
-      g.setFont(font);
-      
+      val area = geometry.areas.head
+      background = area.bgColor
+      super.paintComponent(g);
       g.translate(translateX, translateY)
-      
-      val maxDim = topo.maxDimension
-      for(i <- 0 to maxDim){
-        for(j <- 0 to maxDim){
-          topo.getType(i,j) match {
-            case _:Exit =>
-              g.setColor(Color.YELLOW.darker)
-            case _:Wall =>
-              g.setColor(Color.BLACK)
-            case _:Open =>
-              g.setColor(background)
-            case _ =>
-              g.setColor(Color.RED)
-          }
-          g.fillRect(j*_gridSize, i*_gridSize, _gridSize, _gridSize);
-        }
-      }
-      if(pop != null){
-        for(p <- pop.map.values){
-//          val personInSwingCoords = convertFromGridToSwing(p.position.x, p.position.y);
-//          val rect = new Rectangle(personInSwingCoords._1, personInSwingCoords._2, _gridSize, _gridSize)
-//          val mouseInGridCoords = convertFromSwingToGrid(mouseY, mouseX)
-//          if(drawPersonLabel || rect.contains(mouseInGridCoords._1, mouseInGridCoords._2)){
-          if(drawPersonLabel){
-            g.setColor(Color.WHITE)
-            g.drawString(
-              p.name, 
-              p.position.y * _gridSize + (1.5 * _gridSize).toInt, 
-              p.position.x * _gridSize + _gridSize)
-            g.drawString(
-              p.executor.behavior.name + " : " + p.executor.currentState.name, 
-              p.position.y * _gridSize + (1.5 * _gridSize).toInt, 
-              p.position.x * _gridSize + 2*_gridSize)
-          }
-          g.setColor(Color.BLUE)
-          g.fillRect(
-            p.position.y *_gridSize, 
-            p.position.x *_gridSize, 
-            _gridSize, _gridSize);
-        }
-      }
-      if(drawMouseCoords){
-        g.setColor(Color.WHITE)
-//        g.drawString(
-//          "%d,%d".format(
-//            (mouseY - translateY.intValue) / _gridSize, 
-//            (mouseX  - translateX.intValue) / _gridSize), 
-//          mouseX - translateX.intValue(), 
-//          mouseY - translateY.intValue)
-//        g.drawString(
-//          "%d".format(topo.distance(
-//            (mouseY - translateY.intValue) / _gridSize, 
-//            (mouseX  - translateX.intValue) / _gridSize)), 
-//            mouseX - translateX.intValue(), 
-//            mouseY - translateY.intValue)
-      }
+      g.scale(scaleFactor, scaleFactor);
+      area.draw(g);
     }
-    def convertFromSwingToGrid(x : Int, y : Int) = 
-      ((x  - translateX.intValue) / _gridSize, (y - translateY.intValue) / _gridSize)
-    
-    def convertFromGridToSwing(x : Int, y : Int) = 
-      (x * _gridSize + translateX.intValue, y * _gridSize + translateY.intValue)
-    
     
     listenTo(mouse.clicks, mouse.moves, mouse.wheel)
     reactions += {
@@ -172,59 +107,29 @@ object Main extends SimpleSwingApplication{
       case MouseMoved(_,p,_) => {
         mouseX = p.getX.intValue
         mouseY = p.getY.intValue
-//        repaint
       }
       case MouseDragged(_,p,_) => {
-        translateX += (p.getX() - mouseX)//ui.size.width / 2)
-        translateY += (p.getY() - mouseY)//ui.size.height / 2)
+        translateX += (p.getX() - mouseX)
+        translateY += (p.getY() - mouseY)
         mouseX = p.getX.intValue
         mouseY = p.getY.intValue
         repaint
       }
-      case MouseWheelMoved(source, point, modifiers, value) => {
-        gridSize = gridSize + value
+      case MouseWheelMoved(_, _, _, direction) => {
+        if(direction < 0) scaleFactor /= 1.125
+        else scaleFactor *= 1.125
+        repaint
       }
     }
     
     def reset() = {
       translateX = 0
       translateY = 0
-      _gridSize = 10
       repaint
     }
     
-    def gridSize = _gridSize
-    def gridSize_= (value : Int):Unit = {
-      if(value >= minGridSize && value <= maxGridSize){
-        _gridSize = value
-        repaint
-      }
-    }
   }
 
-  val Tick = "tick"
-  val tickActor = system.actorOf(Props(new Actor {
-    def receive = {
-      case Tick => popActor ! PopulationRequest
-      case e : PopulationResponse => {
-        tickCount += 1
-        pop = e.pop
-        ui.repaint
-      }
-    }
-  }))
-  
-  var delay = 300
-  var future : Option[Cancellable] = None //scheduleTick(delay)
-    
-  def scheduleTick(delay : Int = 100) = {
-    Some(system.scheduler.schedule(
-      Duration.Zero,
-      delay milliseconds,
-      tickActor,
-      Tick)(ExecutionContexts.global))
-  }
-  
   lazy val mainUi : Panel = new BoxPanel(Orientation.Vertical) {
     contents += ui;
     
@@ -243,15 +148,8 @@ object Main extends SimpleSwingApplication{
         listenTo(this)
         reactions += {
           case ButtonClicked(_) =>
-            if(!future.isDefined || future.get.isCancelled){
-              future = scheduleTick(delay)
-              tickBtn.enabled = false
-              text = "Pause"
-            }else{
-              future.get.cancel
-              tickBtn.enabled = true
-              text = "Run"
-            }
+            tickBtn.enabled = false
+            text = "Pause"
         }
       }
       contents += new Slider {
@@ -265,11 +163,6 @@ object Main extends SimpleSwingApplication{
         
         reactions += {
           case ValueChanged(_) if !adjusting => {
-            delay = max + min - value
-            if(!future.get.isCancelled){
-              future.get.cancel
-              future = scheduleTick(delay)
-            }
           }
         }
       }
@@ -277,8 +170,14 @@ object Main extends SimpleSwingApplication{
       contents += tickBtn
     }
     
-    contents += new Button("Reset") {
-      reactions += { case ButtonClicked(_) => ui.reset }
+    contents += new BoxPanel(Orientation.Horizontal){
+      contents += new Button("Reset") {
+        reactions += { case ButtonClicked(_) => ui.reset }
+      }
+      
+      contents += new Button("Toggle Labels") {
+        reactions += { case ButtonClicked(_) => ui.drawPersonLabel = !ui.drawPersonLabel}
+      }
     }
   }
   

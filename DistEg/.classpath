@@ -10,5 +10,7 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/Summers/workspace/DistEg/lib/akka-2.1.2/lib/akka/config-1.0.0.jar"/>
 	<classpathentry kind="lib" path="C:/Program Files (x86)/scala/lib/scala-compiler.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.2/lib/akka/akka-actor_2.10-2.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.2/lib/akka/config-1.0.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
