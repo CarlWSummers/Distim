@@ -26,7 +26,7 @@ object Ys extends CC[Double]
 
 case class PersonHolder(id :String, name : String, male : Boolean, behaviorName : String, pos : Position)
 
-class Population(file : String, terrain : Topography, behaviors : Map[String, Behavior]) extends Actor{
+class Population(file : File, terrain : Topography, behaviors : Map[String, Behavior]) extends Actor{
   val sourceFile = Source.fromFile(file)
   val jsonString = sourceFile.mkString
   sourceFile.close
@@ -75,7 +75,7 @@ class Population(file : String, terrain : Topography, behaviors : Map[String, Be
       for(p <- map.values){
         val updatedPerson = p.update(terrain, this)
         if(!terrain.getType(p.position.x, p.position.y).isInstanceOf[Exit])
-          map += (p.id -> updatedPerson)
+          map += (p.id -> updatedPerson) 
         else
           map -= p.id
       }
