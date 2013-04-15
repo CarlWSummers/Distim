@@ -8,6 +8,7 @@ import edu.uccs.summers.data.Open
 import edu.uccs.summers.data.Population
 import edu.uccs.summers.data.Person
 import edu.uccs.summers.data.TerrainType
+import edu.uccs.summers.data.geometry.shapes.Point
 
 class Action (val parentAction : Option[Action], val body : String){
   
@@ -28,7 +29,7 @@ class RandomWalk extends Action(None, "") {
     
     val move = Random.shuffle(pop.openMoves(p.position.x, p.position.y)).take(1).headOption
     if(move.isDefined)
-      return Person(p.id, p.name, p.male, p.executor, Position(move.get._1, move.get._2))
+      return Person(p.id, p.executor, Point(move.get._1, move.get._2))
     return p
   }
 }
@@ -50,7 +51,7 @@ class MoveDirect extends Action(None, ""){
       val move = openMoves.map(a => terrain.getType(a._1, a._2)).reduce((a,b) => {
         if(a.distance <= b.distance) a else b
       })
-      return Person(person.id, person.name, person.male, person.executor, Position(move.x, move.y))
+      return Person(person.id, person.executor, Point(move.x, move.y))
     }else{
       return person
     }

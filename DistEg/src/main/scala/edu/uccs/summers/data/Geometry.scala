@@ -9,22 +9,35 @@ import edu.uccs.summers.data.geometry.shapes.Shape
 import edu.uccs.summers.data.geometry.shapes.Polygon
 import edu.uccs.summers.data.geometry.AreaTransition
 import edu.uccs.summers.data.geometry.Area
+import edu.uccs.summers.data.geometry.InitialPopulationParameters
+import edu.uccs.summers.data.population.PopulationArchetypeDescriptor
+import scala.collection._
+import edu.uccs.summers.data.geometry.SpawnArea
 
 class Geometry(val areas : List[Area]) {
-
-//  val parser = new GeometryParser()
-
 }
 
-class GeometryParser extends JavaTokenParsers {
+class GeometryParser(popTypes : mutable.Map[String, PopulationArchetypeDescriptor]) extends JavaTokenParsers {
 
   def areaList = rep(areaDescription)
   
-  def areaDescription = ("Area" ~> areaName) ~ ("{" ~> objectList) <~ "}" ^^ {
-    case name ~ entityList => Area(name, entityList)
+  def areaDescription = ("Area" ~> areaName) ~ ("{" ~> initialPopulationParameters) ~ (objectList <~ "}") ^^ {
+    case name ~ popParams ~ entityList => Area(name, entityList, popParams)
   }
   
   def areaName = ident
+  
+  def initialPopulationParameters = ("Population" ~> "{" ~> initialPopulationSize) ~ ("of" ~> "types" ~> "(" ~> rep(archetype)) <~ ")" <~ "}" ^^ {
+    case size ~ types => InitialPopulationParameters(size._1, size._2, types)
+  }
+  
+  def archetype = ident ^^ {
+    case typeName => popTypes.get(typeName).get
+  }
+  
+  def initialPopulationSize = ("Create" ~> wholeNumber) ~ (("to" ~> wholeNumber) <~ "persons") ^^ {
+    case min ~ max => (min.toInt,max.toInt)
+  }
   
   def objectList = rep(objectDescription)
   
@@ -34,7 +47,12 @@ class GeometryParser extends JavaTokenParsers {
       ("Wall" ~> "{" ~> wallProperties) <~ "}"
     | ("Transition" ~> "{" ~> transitionProperties) <~ "}"
     | ("Exit" ~> "{" ~> exitProperties) <~ "}"
+    | ("Spawn" ~> "{" ~> spawnProperties) <~ "}"
   )
+  
+  def spawnProperties = shapeDef ^^ {
+    case shape => new SpawnArea(shape)
+  }
   
   def exitProperties = shapeDef ^^ {
     case shape => new edu.uccs.summers.data.geometry.Exit(shape)

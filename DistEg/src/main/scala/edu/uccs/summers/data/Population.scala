@@ -9,6 +9,7 @@ import edu.uccs.summers.messages.PopulationResponse
 import scala.util.Random
 import scala.collection._
 import edu.uccs.summers.data.behaviors.Behavior
+import edu.uccs.summers.data.geometry.shapes.Point
 
 class CC[T] { 
   def unapply(a:Any):Option[T] = 
@@ -44,7 +45,7 @@ class Population(file : File, terrain : Topography, behaviors : Map[String, Beha
     Ys(y) = person("y")
     
   } yield PersonHolder(id, name, male, behavior, Position(x.toInt, y.toInt))){
-    val person = Person(p.id, p.name, p.male, null, p.pos)
+    val person = Person(p.id, null, Point(p.pos.x, p.pos.y))
     person.executor = behaviors.get(p.behaviorName).get.executor(person)
     map += (p.id -> person)
   }

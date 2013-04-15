@@ -76,7 +76,7 @@ object Main extends SimpleSwingApplication{
   }
   
   def top = new MainFrame {
-    title = "DistEg"
+    title = "Distributed Egress"
     contents = mainUi;
   }
 }

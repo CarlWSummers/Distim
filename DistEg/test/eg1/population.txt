@@ -1,40 +1,6 @@
-{
-    "persons": [
-        {
-        	"id" : "A",
-            "name": "Carl",
-            "behavior" : "Elvis",
-            "x" : 7,
-            "male" : true,
-            "y" : 7
-        },{
-        	"id" : "P",
-        	"name" : "Person",
-        	"behavior" : "AnotherBehavior",
-        	"male" : false,
-        	"x" : 12,
-        	"y" : 17
-        },{
-        	"id" : "Q",
-        	"name" : "Person",
-        	"behavior" : "BehaviorTest",
-        	"male" : false,
-        	"x" : 24,
-        	"y" : 36
-        },{
-        	"id" : "R",
-        	"name" : "Confused",
-        	"behavior" : "Undecided",
-        	"male" : true,
-        	"x" : 31,
-        	"y" : 19
-        },{
-        	"id" : "D",
-        	"name" : "Person",
-            "behavior" : "Elvis",
-            "male" : false,
-            "x" : 56,
-            "y" : 46
-        }
-    ]
+Population {
+  def Simple {
+    Behavior : BehaviorTest
+    Properties : {}
+  }
 }
