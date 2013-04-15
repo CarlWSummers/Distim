@@ -10,18 +10,10 @@ import edu.uccs.summers.data.geometry.shapes.Polygon
 import edu.uccs.summers.data.geometry.AreaTransition
 import edu.uccs.summers.data.geometry.Area
 
-class Geometry(fileLocation : String) {
+class Geometry(val areas : List[Area]) {
 
-  val parser = new GeometryParser()
-  
-  val areas = parser.parseAll(parser.areaList , Source.fromFile(fileLocation).bufferedReader) match {
-    case parser.Success(r, t) => {
-      r
-    }
-    case e => 
-      println("Failed to parse Geometry File:" + e)
-      exit
-  }
+//  val parser = new GeometryParser()
+
 }
 
 class GeometryParser extends JavaTokenParsers {

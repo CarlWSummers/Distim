@@ -3,7 +3,7 @@ package edu.uccs.summers.data.geometry
 import java.awt.Graphics2D
 import java.awt.Color
 
-class Area(name : String, objects : List[StaticEntity]) {
+class Area(val name : String, val objects : List[StaticEntity]) {
 
   val bgColor = new Color(25, 99, 40)
   

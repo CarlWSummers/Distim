@@ -6,7 +6,7 @@ Area Area1 {
 
   Transition {
     t1
-    circle 
+    circle
       center : (300,400)
       radius : 50
     transition to Area2 t1
@@ -35,5 +35,3 @@ Area Area2 {
     transition to Area1 t1
   }
 }
-
-
