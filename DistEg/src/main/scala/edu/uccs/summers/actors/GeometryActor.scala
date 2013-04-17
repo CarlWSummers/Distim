@@ -88,8 +88,6 @@ class SimulationMaster extends Actor{
         return InitFailed("Failed to parse Geometry file:" + e)
     }
     
-    
-//    popActor = context.actorOf(Props(new Population(initData.populationFile, null, behaviors toMap)), name = "master")
     return InitSuccessful
   }
   

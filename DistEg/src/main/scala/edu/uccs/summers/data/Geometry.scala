@@ -21,8 +21,8 @@ class GeometryParser(popTypes : mutable.Map[String, PopulationArchetypeDescripto
 
   def areaList = rep(areaDescription)
   
-  def areaDescription = ("Area" ~> areaName) ~ ("{" ~> initialPopulationParameters) ~ (objectList <~ "}") ^^ {
-    case name ~ popParams ~ entityList => Area(name, entityList, popParams)
+  def areaDescription = ("Area" ~> areaName) ~ ("{" ~> initialPopulationParameters) ~ boundsDefinition ~ (objectList <~ "}") ^^ {
+    case name ~ popParams ~ bounds ~ entityList => Area(name, bounds, entityList, popParams)
   }
   
   def areaName = ident
@@ -39,6 +39,8 @@ class GeometryParser(popTypes : mutable.Map[String, PopulationArchetypeDescripto
     case min ~ max => (min.toInt,max.toInt)
   }
   
+  def boundsDefinition = "Bounds" ~> "{" ~> (shapeDef <~ "}")
+  
   def objectList = rep(objectDescription)
   
   def objectDescription = objectType
@@ -47,12 +49,7 @@ class GeometryParser(popTypes : mutable.Map[String, PopulationArchetypeDescripto
       ("Wall" ~> "{" ~> wallProperties) <~ "}"
     | ("Transition" ~> "{" ~> transitionProperties) <~ "}"
     | ("Exit" ~> "{" ~> exitProperties) <~ "}"
-    | ("Spawn" ~> "{" ~> spawnProperties) <~ "}"
   )
-  
-  def spawnProperties = shapeDef ^^ {
-    case shape => new SpawnArea(shape)
-  }
   
   def exitProperties = shapeDef ^^ {
     case shape => new edu.uccs.summers.data.geometry.Exit(shape)
@@ -92,8 +89,7 @@ class GeometryParser(popTypes : mutable.Map[String, PopulationArchetypeDescripto
   def rectanglePointDimensions = 
     ("starting" ~> "at" ~> pointDesc) ~ 
     ("with" ~> "width" ~> wholeNumber) ~ 
-    ("and" ~> "height" ~> wholeNumber) ^^ 
-    {
+    ("and" ~> "height" ~> wholeNumber) ^^ {
       case  point ~ width ~ height => Rectangle(point, width.toInt, height.toInt)
     }
   

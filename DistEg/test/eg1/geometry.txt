@@ -3,16 +3,16 @@ Area Area1 {
     Create 4 to 40 persons of types (Simple)
   }
   
-  Wall {
-    polygon (0,0),(0, 100),(100, 100), (100, 0)
-  }
-
-  Spawn {
+  Bounds {
     circle 
-      center : (200, 200)
-      radius : 30
+      center : (300, 400)
+      radius : 1000
   }
   
+  Wall {
+    polygon (0,0), (0, 100), (100, 100), (100, 0)
+  }
+
   Transition {
     t1
     circle
@@ -27,10 +27,8 @@ Area Area2 {
     Create 4 to 40 persons of types (Simple)
   }
   
-  Spawn {
-    circle
-      center : (200, 300)
-      radius : 50
+  Bounds {
+    rectangle upper left (0, 0) to lower right (1000, 1000)
   }
   
   Wall {

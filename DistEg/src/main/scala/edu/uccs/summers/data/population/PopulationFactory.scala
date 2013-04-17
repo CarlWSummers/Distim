@@ -9,7 +9,6 @@ object PopulationFactory {
   def createPerson(id : String, descriptor : PopulationArchetypeDescriptor, area : Area) : Person = {
     val person = Person(id, null, area.generateSpawnPoint)
     person.executor = descriptor.behavior.executor(person)
-    
     return person
   }
 }

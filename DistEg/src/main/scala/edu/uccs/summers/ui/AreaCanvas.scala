@@ -8,6 +8,7 @@ import scala.swing.event.MouseExited
 import scala.swing.event.MouseMoved
 import scala.swing.event.MouseDragged
 import scala.swing.event.MouseWheelMoved
+import java.awt.Color
 
 class AreaCanvas extends Panel {
 
@@ -61,8 +62,9 @@ class AreaCanvas extends Panel {
       super.paintComponent(g);
       return
     }
-    background = area.bgColor
+    background = Color.BLACK
     super.paintComponent(g);
+    
     g.translate(translateX, translateY)
     g.scale(scaleFactor, scaleFactor);
     area.draw(g);
