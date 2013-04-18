@@ -42,7 +42,7 @@ class AreaCanvas extends Panel {
       repaint
     }
     case ev : MouseWheelMoved => {
-      val modifier = if(ev.peer.isControlDown()) 1.03125 else 1.125
+      val modifier = if(ev.peer.isControlDown()) 1.03125 else if(ev.peer.isShiftDown()) 1.25 else 1.125
       if(ev.rotation > 0) scaleFactor /= modifier
       else scaleFactor *= modifier
       repaint
