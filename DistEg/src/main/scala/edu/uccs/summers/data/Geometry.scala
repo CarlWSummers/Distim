@@ -12,7 +12,6 @@ import edu.uccs.summers.data.geometry.Area
 import edu.uccs.summers.data.geometry.InitialPopulationParameters
 import edu.uccs.summers.data.population.PopulationArchetypeDescriptor
 import scala.collection._
-import edu.uccs.summers.data.geometry.SpawnArea
 
 class Geometry(val areas : List[Area]) {
 }

@@ -1,8 +1,9 @@
 package edu.uccs.summers.messages
 
-import edu.uccs.summers.data.Population
+import akka.actor.ActorRef
+import edu.uccs.summers.data.Person
+import edu.uccs.summers.data.geometry.Area
 
 sealed trait PopulationMessage
 
-case object PopulationRequest extends PopulationMessage
-case class PopulationResponse(pop : Population) extends PopulationMessage
+case class Compute(area : Area, pop : Set[Person], resultDest : ActorRef)

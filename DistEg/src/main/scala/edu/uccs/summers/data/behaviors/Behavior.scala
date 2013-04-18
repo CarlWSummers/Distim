@@ -1,18 +1,17 @@
 package edu.uccs.summers.data.behaviors
 
 import scala.util.Random
-
 import edu.uccs.summers.data.Open
 import edu.uccs.summers.data.Person
-import edu.uccs.summers.data.Population
-import edu.uccs.summers.data.Position
 import edu.uccs.summers.data.Topography
+import edu.uccs.summers.data.Geometry
+import edu.uccs.summers.data.geometry.Area
 
 
 class Behavior (val name : String, val states : List[State]){
   val nullState = new State("", false, null, null)
   def executor (p : Person) = new BehaviorExecutor(this)
-  def state(s : String, default : State) : State = {
+  def stateOf(s : String, default : State) : State = {
     states.find(_.name == s).getOrElse(default)
   }
 }
@@ -27,17 +26,17 @@ class BehaviorExecutor(val behavior : Behavior) {
     else a)
   if(currentState == nullState) throw new Exception("No initial state set for " + behavior.name + " behavior")
   
-  def execute(t : Topography, pop : Population, p : Person) : Person = {
+  def execute(area : Area, pop : Set[Person], p : Person) : Person = {
     val ctx = ExecutionContext(None)
     ctx.bind("person", p)
-    ctx.bind("terrain", t)
+    ctx.bind("area", area)
     ctx.bind("population", pop)
     ctx.bind("Population", pop)
     ctx.bind("Random", Random)
     
     try{
-      currentState.transitions.find(_(ctx).asInstanceOf[Boolean]).map(t => 
-        currentState = behavior.state(t.destinationState, badState))
+      currentState.transitions.find(_(ctx)).map(t => 
+        currentState = behavior.stateOf(t.destinationState, badState))
     } catch {
       case e : Exception => {
         e.printStackTrace()
@@ -50,5 +49,5 @@ class BehaviorExecutor(val behavior : Behavior) {
 
 object BehaviorExecutor{
   val nullState = new State("", false, null, null)
-  val badState = new State("Broken State Machine", false, List(), new Idle)
+  val badState = new State("Broken State Machine", false, List(), Idle)
 }

@@ -10,8 +10,8 @@ class Rectangle(ul : Point, width : Int, height : Int) extends Shape {
   }
   
   def generatePointWithin(rnd : Random) : Point = {
-    val x = rnd.nextInt(ul.x - width) + ul.x
-    val y = rnd.nextInt(ul.y - height) + ul.y
+    val x = rnd.nextInt(Math.max(ul.x - width, width)) + ul.x
+    val y = rnd.nextInt(Math.max(ul.y - height, height)) + ul.y
     Point(x,y)
   }
 }

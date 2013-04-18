@@ -1,9 +1,14 @@
 package edu.uccs.summers.data.geometry
 
 import edu.uccs.summers.data.geometry.shapes.Shape
+import java.awt.Color
 
 class Wall(shape : Shape) extends StaticEntity(shape) {
   def isCollidable : Boolean = true
+  
+  def getColor() : Color = {
+    Color.BLACK
+  }
 }
 
 object Wall{

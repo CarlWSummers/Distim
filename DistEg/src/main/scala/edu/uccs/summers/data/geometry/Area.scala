@@ -18,12 +18,7 @@ class Area(val name : String, val boundingShape : Shape, val objects : List[Stat
   }
   
   def generateSpawnPoint() : Point = {
-    val spawnAreas = objects.flatMap(entity => entity match {
-      case e : SpawnArea => e :: Nil
-      case _ => Nil
-    })
-    
-    spawnAreas.head.shape.generatePointWithin(Area.rnd)
+    boundingShape.generatePointWithin(Area.rnd)
   }
 }
 

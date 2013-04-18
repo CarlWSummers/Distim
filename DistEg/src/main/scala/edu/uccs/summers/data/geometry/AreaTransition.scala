@@ -12,6 +12,10 @@ class AreaTransition(name : String, s : Shape, destArea : String, destTransition
     super.draw(g)
     g.setColor(oldColor);
   }
+  
+  def getColor() : Color = {
+    Color.CYAN
+  }
 }
 
 object AreaTransition{

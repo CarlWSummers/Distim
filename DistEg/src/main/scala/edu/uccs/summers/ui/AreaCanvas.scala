@@ -9,10 +9,13 @@ import scala.swing.event.MouseMoved
 import scala.swing.event.MouseDragged
 import scala.swing.event.MouseWheelMoved
 import java.awt.Color
+import edu.uccs.summers.data.Person
 
 class AreaCanvas extends Panel {
 
   private var area : Area = null
+  private var pop : Set[Person] = null
+  
   private var translateX = 0.0;
   private var translateY = 0.0;
   private var scaleFactor = 1.0;
@@ -32,21 +35,23 @@ class AreaCanvas extends Panel {
       mouseY = p.getY.intValue
     }
     case MouseDragged(_,p,_) => {
-      translateX += (p.getX() - mouseX)
-      translateY += (p.getY() - mouseY)
+      translateX += (p.getX() - mouseX) / scaleFactor
+      translateY += (p.getY() - mouseY) / scaleFactor
       mouseX = p.getX.intValue
       mouseY = p.getY.intValue
       repaint
     }
-    case MouseWheelMoved(_, _, _, direction) => {
-      if(direction < 0) scaleFactor /= 1.125
-      else scaleFactor *= 1.125
+    case ev : MouseWheelMoved => {
+      val modifier = if(ev.peer.isControlDown()) 1.03125 else 1.125
+      if(ev.rotation > 0) scaleFactor /= modifier
+      else scaleFactor *= modifier
       repaint
     }
   }
 
-  def update(area : Area){
+  def update(area : Area, pop : Set[Person]){
     this.area = area
+    this.pop = pop
     repaint
   }
   
@@ -65,8 +70,14 @@ class AreaCanvas extends Panel {
     background = Color.BLACK
     super.paintComponent(g);
     
+    g.translate(size.width / 2, size.height / 2)
+    g.scale(scaleFactor, scaleFactor)
     g.translate(translateX, translateY)
-    g.scale(scaleFactor, scaleFactor);
     area.draw(g);
+    
+    g.setColor(Color.MAGENTA)
+    pop.foreach(person => {
+      g.fillOval(person.position.x - 1, person.position.y - 1, 3, 3)
+    })
   }
 }

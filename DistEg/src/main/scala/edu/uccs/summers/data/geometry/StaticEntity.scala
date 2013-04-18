@@ -2,8 +2,16 @@ package edu.uccs.summers.data.geometry
 
 import edu.uccs.summers.data.geometry.shapes.Shape
 import java.awt.Graphics2D
+import java.awt.Color
 
 abstract class StaticEntity(shape : Shape) {
-  def draw(g : Graphics2D) : Unit = shape.draw(g)
+  def draw(g : Graphics2D) : Unit = {
+    val oldColor = g.getColor;
+    g.setColor(getColor)
+    shape.draw(g)
+    g.setColor(oldColor)
+  }
+  
   def isCollidable : Boolean
+  def getColor() : Color
 }

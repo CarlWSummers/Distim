@@ -8,7 +8,6 @@ import akka.actor.Props
 import akka.actor.actorRef2Scala
 import edu.uccs.summers.data.Geometry
 import edu.uccs.summers.data.GeometryParser
-import edu.uccs.summers.data.Population
 import edu.uccs.summers.data.SimulationInitData
 import edu.uccs.summers.data.behaviors.Behavior
 import edu.uccs.summers.data.behaviors.BehaviorsParser
@@ -25,30 +24,58 @@ import edu.uccs.summers.messages.SimulationStepRequest
 import edu.uccs.summers.messages.SimulationStepResult
 import edu.uccs.summers.data.population.PopulationParser
 import edu.uccs.summers.data.population.PopulationArchetypeDescriptor
+import akka.actor.ActorSystem
+import akka.routing.Router
+import akka.actor.UntypedActorFactory
+import akka.routing.RoundRobinRouter
+import edu.uccs.summers.messages.SimulationStepExecutionComplete
+import edu.uccs.summers.data.Person
+import edu.uccs.summers.data.geometry.Area
+import scala.util.Random
+import edu.uccs.summers.data.population.PopulationFactory
+import scala.collection._
+import edu.uccs.summers.messages.Compute
 
-class SimulationMaster extends Actor{
+class SimulationMaster(system : ActorSystem) extends Actor{
   
   private val listeners = scala.collection.mutable.Set[ActorRef]()
   private val behaviors = mutable.Map[String, Behavior]()
   private val popArchTypes = mutable.Map[String, PopulationArchetypeDescriptor]()
   
   private var initialized = false;
-  
   private var geometry : Geometry = null
+  private var latestPopulation : Set[Person] = Set()
   
-
+  private var popExecs : ActorRef = null
+  private var popAggregator : ActorRef = null
+  
   def receive = {
     case SimulationInitialize(s) => {
       initSim(s) match {
         case InitSuccessful => {
           sender ! InitSuccessful
-          listeners.foreach(_ ! SimulationStepResult(geometry))
+          listeners.foreach(_ ! SimulationStepResult(geometry, latestPopulation.toSet))
         }
         case e : InitFailed => sender ! e
       }
     }
+    
+    case SimulationStepExecutionComplete(newPop) => {
+      latestPopulation = newPop
+      listeners.foreach(_ ! SimulationStepResult(geometry, newPop))
+    }
+    
     case SimulationStepRequest => {
-      listeners.foreach(_ ! SimulationStepResult(geometry))
+      val popByArea = latestPopulation.foldLeft(mutable.Map[Area, mutable.Set[Person]]())((areaToPeopleMap, person) => {
+        if(!areaToPeopleMap.contains(person.currentArea)){
+          areaToPeopleMap.put(person.currentArea, mutable.Set())
+        }
+        areaToPeopleMap(person.currentArea) += person
+        areaToPeopleMap
+      })
+      popByArea.foreach((tuple) => {
+        popExecs ! Compute(tuple._1, tuple._2.toSet, popAggregator)
+      })
     }
     
     case AddSimulationListener(listener) => {
@@ -61,7 +88,7 @@ class SimulationMaster extends Actor{
 
     val behaviorsParser = new BehaviorsParser(new ParsingContext)
     behaviorsParser.bind("RandomWalk", new RandomWalk)
-    behaviorsParser.bind("Idle", new Idle)
+    behaviorsParser.bind("Idle", Idle)
     behaviorsParser.bind("MoveDirect", new MoveDirect)
     behaviorsParser.parseAll(behaviorsParser.behaviorListing, Source.fromFile(initData.behaviorsFile).bufferedReader) match {
       case behaviorsParser.Success(r, t) => 
@@ -87,6 +114,20 @@ class SimulationMaster extends Actor{
         println("Failed to parse Geometry File:" + e)
         return InitFailed("Failed to parse Geometry file:" + e)
     }
+
+    val rnd = Random
+    geometry.areas.foreach(area => {
+      val maxPop = area.popParams.maxSize
+      val minPop = area.popParams.minSize
+      val count = rnd.nextInt(maxPop - minPop) + minPop
+      val fixmeType = area.popParams.popTypes.head
+      for(i <- 0 to count){
+        latestPopulation += PopulationFactory.createPerson(area.name + "_" + i, fixmeType, area)
+      }
+    })
+    
+    popExecs = context.actorOf(Props[SimulationStepExecutor].withRouter(RoundRobinRouter(geometry.areas.size)))
+    popAggregator = context.actorOf(Props(new SimulationStepAggregator(geometry.areas.size)))
     
     return InitSuccessful
   }
