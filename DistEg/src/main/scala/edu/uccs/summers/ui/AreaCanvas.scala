@@ -67,7 +67,7 @@ class AreaCanvas extends Panel {
       super.paintComponent(g);
       return
     }
-    background = Color.BLACK
+    background = Color.LIGHT_GRAY
     super.paintComponent(g);
     
     g.translate(size.width / 2, size.height / 2)
@@ -77,7 +77,7 @@ class AreaCanvas extends Panel {
     
     g.setColor(Color.MAGENTA)
     pop.foreach(person => {
-      g.fillOval(person.position.x - 1, person.position.y - 1, 3, 3)
+      g.fillOval(Math.round(person.position.x).toInt - 1, Math.round(person.position.y).toInt - 1, 3, 3)
     })
   }
 }

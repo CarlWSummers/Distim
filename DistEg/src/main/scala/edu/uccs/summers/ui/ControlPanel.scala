@@ -57,8 +57,8 @@ class ControlPanel(actorSystem : ActorSystem, simMaster : ActorRef, areaTabPanel
         try{
           chooser.showOpenDialog(null) match {
             case FileChooser.Result.Approve => {
-                simulationListener ! Forward(simMaster, SimulationInitialize(
-                  new SimulationInitData(chooser.selectedFile)))
+              simulationListener ! Forward(simMaster, SimulationInitialize(
+                new SimulationInitData(chooser.selectedFile)))
             }
           }
         }catch{

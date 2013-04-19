@@ -8,8 +8,9 @@ import edu.uccs.summers.data.Person
 
 sealed trait SimulationMessage
 case class SimulationInitialize(init : SimulationInitData) extends SimulationMessage
-case object SimulationStepRequest extends SimulationMessage
+case object SimulationClear extends SimulationMessage
 
+case object SimulationStepRequest extends SimulationMessage
 case class SimulationStepResult(g : Geometry, pop : Set[Person]) extends SimulationMessage
 case class SimulationStepPartialResult(partialPop : Set[Person]) extends SimulationMessage
 case class SimulationStepExecutionComplete(population : Set[Person]) extends SimulationMessage

@@ -14,6 +14,8 @@ libraryDependencies += "org.scala-lang" % "scala-compiler" % "2.10.1"
 
 libraryDependencies += "org.scala-lang" % "scala-swing" % "2.10.1"
 
+libraryDependencies += "org.simplex3d" %% "simplex3d-engine-default" %"0.3-SNAPSHOT"
+
 scalacOptions += "-deprecation"
 
 scalacOptions += "-feature"
