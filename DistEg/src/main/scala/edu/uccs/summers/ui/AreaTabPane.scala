@@ -14,6 +14,7 @@ import akka.actor.Props
 import java.awt.Dimension
 import edu.uccs.summers.data.Person
 import edu.uccs.summers.data.geometry.Area
+import edu.uccs.summers.messages.SimulationClear
 
 class AreaTabPane(val actorSystem : ActorSystem) extends BoxPanel(Orientation.Vertical) {
   import TabbedPane._
@@ -48,6 +49,11 @@ class AreaTabPane(val actorSystem : ActorSystem) extends BoxPanel(Orientation.Ve
   def reset() {
     areaToPageMap.values.foreach(_.reset)
   }
+  
+  def clear() {
+    tabbedPane.pages.clear
+    areaToPageMap.clear
+  }
 }
 
 class AreaTabPaneSimulationListener() extends Actor {
@@ -57,6 +63,11 @@ class AreaTabPaneSimulationListener() extends Actor {
     case SimulationStepResult(geometry, pop) => {
       parent.update(geometry, pop)
     }
+    
+    case SimulationClear => {
+      parent.clear()
+    }
+    
     case parent : AreaTabPane => {
       this.parent = parent
     }

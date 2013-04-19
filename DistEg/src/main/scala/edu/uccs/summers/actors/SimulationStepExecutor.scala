@@ -12,8 +12,20 @@ class SimulationStepExecutor extends Actor{
   def receive = {
     case Compute(area, pop, responseDest) => {
       val updatedPop = pop.map(person => {
+        var currentPos = person.position
         val updatedPerson = person.update(area, pop)
-        Person(person.id, person.executor, Point(person.position.x + person.velocity.x, person.position.y + person.velocity.y), updatedPerson.velocity, area)
+        var currentVel = person.velocity
+        area.objects.foreach(t => {
+          if(t.isCollidable){
+            val collision = t.resolveCollision(currentPos, currentVel)
+            collision.foreach( p => {
+              currentPos = p._1
+              currentVel = p._2
+              Person(person.id, person.executor, p._1, p._2, area)
+            })
+          }
+        })
+        Person(person.id, person.executor, currentPos + currentVel, currentVel, area)
       })
       responseDest ! SimulationStepPartialResult(updatedPop)
     }

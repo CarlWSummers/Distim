@@ -1,13 +1,20 @@
 package edu.uccs.summers.actors
 
+import scala.collection._
 import scala.collection.mutable
 import scala.io.Source
+import scala.util.Random
+
 import akka.actor.Actor
 import akka.actor.ActorRef
+import akka.actor.ActorSystem
 import akka.actor.Props
+import akka.actor.UntypedActorFactory
 import akka.actor.actorRef2Scala
+import akka.routing.RoundRobinRouter
 import edu.uccs.summers.data.Geometry
 import edu.uccs.summers.data.GeometryParser
+import edu.uccs.summers.data.Person
 import edu.uccs.summers.data.SimulationInitData
 import edu.uccs.summers.data.behaviors.Behavior
 import edu.uccs.summers.data.behaviors.BehaviorsParser
@@ -15,26 +22,20 @@ import edu.uccs.summers.data.behaviors.Idle
 import edu.uccs.summers.data.behaviors.MoveDirect
 import edu.uccs.summers.data.behaviors.ParsingContext
 import edu.uccs.summers.data.behaviors.RandomWalk
+import edu.uccs.summers.data.geometry.Area
+import edu.uccs.summers.data.population.PopulationArchetypeDescriptor
+import edu.uccs.summers.data.population.PopulationFactory
+import edu.uccs.summers.data.population.PopulationParser
 import edu.uccs.summers.messages.AddSimulationListener
+import edu.uccs.summers.messages.Compute
 import edu.uccs.summers.messages.InitFailed
 import edu.uccs.summers.messages.InitSuccessful
+import edu.uccs.summers.messages.SimulationClear
 import edu.uccs.summers.messages.SimulationInitializationResult
 import edu.uccs.summers.messages.SimulationInitialize
+import edu.uccs.summers.messages.SimulationStepExecutionComplete
 import edu.uccs.summers.messages.SimulationStepRequest
 import edu.uccs.summers.messages.SimulationStepResult
-import edu.uccs.summers.data.population.PopulationParser
-import edu.uccs.summers.data.population.PopulationArchetypeDescriptor
-import akka.actor.ActorSystem
-import akka.routing.Router
-import akka.actor.UntypedActorFactory
-import akka.routing.RoundRobinRouter
-import edu.uccs.summers.messages.SimulationStepExecutionComplete
-import edu.uccs.summers.data.Person
-import edu.uccs.summers.data.geometry.Area
-import scala.util.Random
-import edu.uccs.summers.data.population.PopulationFactory
-import scala.collection._
-import edu.uccs.summers.messages.Compute
 
 class SimulationMaster(system : ActorSystem) extends Actor{
   
@@ -54,10 +55,11 @@ class SimulationMaster(system : ActorSystem) extends Actor{
       initSim(s) match {
         case InitSuccessful => {
           sender ! InitSuccessful
+          listeners.foreach(_ ! SimulationClear)
           listeners.foreach(_ ! SimulationStepResult(geometry, latestPopulation.toSet))
         }
         case e : InitFailed => sender ! e
-      }
+      } 
     }
     
     case SimulationStepExecutionComplete(newPop) => {
@@ -84,8 +86,13 @@ class SimulationMaster(system : ActorSystem) extends Actor{
   }
   
   def initSim(initData : SimulationInitData) : SimulationInitializationResult = {
-    initialized = true;
-
+    behaviors.clear
+    popArchTypes.clear
+    geometry = null
+    latestPopulation = Set()
+    popExecs = null
+    popAggregator = null
+    
     val behaviorsParser = new BehaviorsParser(new ParsingContext)
     behaviorsParser.bind("RandomWalk", new RandomWalk)
     behaviorsParser.bind("Idle", Idle)
@@ -119,9 +126,9 @@ class SimulationMaster(system : ActorSystem) extends Actor{
     geometry.areas.foreach(area => {
       val maxPop = area.popParams.maxSize
       val minPop = area.popParams.minSize
-      val count = rnd.nextInt(maxPop - minPop) + minPop
+      val count = if(maxPop == minPop) minPop else rnd.nextInt(maxPop - minPop) + minPop
       val fixmeType = area.popParams.popTypes.head
-      for(i <- 0 to count){
+      for(i <- 0 to count - 1){
         latestPopulation += PopulationFactory.createPerson(area.name + "_" + i, fixmeType, area)
       }
     })
@@ -129,6 +136,7 @@ class SimulationMaster(system : ActorSystem) extends Actor{
     popExecs = context.actorOf(Props[SimulationStepExecutor].withRouter(RoundRobinRouter(geometry.areas.size)))
     popAggregator = context.actorOf(Props(new SimulationStepAggregator(geometry.areas.size)))
     
+    initialized = true;
     return InitSuccessful
   }
   

@@ -24,8 +24,8 @@ class RandomWalk extends Action(None, "") {
   override def perform(ctx : ExecutionContext) : Person = {
     val p = ctx.dereference("person").asInstanceOf[Person]
     val rnd = ctx.dereference("Random").asInstanceOf[Random]
-    val newVelocity = Point(rnd.nextInt(20) - 10, rnd.nextInt(20) - 10)
-    return Person(p.id, p.executor, p.position, newVelocity, p.currentArea)
+//    val newVelocity = Point(0, -5)
+    return Person(p.id, p.executor, p.position, p.velocity, p.currentArea)
   }
 }
 
