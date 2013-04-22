@@ -15,6 +15,8 @@ import java.awt.Dimension
 import edu.uccs.summers.data.Person
 import edu.uccs.summers.data.geometry.Area
 import edu.uccs.summers.messages.SimulationClear
+import scala.swing.Swing
+import javax.swing.SwingUtilities
 
 class AreaTabPane(val actorSystem : ActorSystem) extends BoxPanel(Orientation.Vertical) {
   import TabbedPane._
@@ -42,7 +44,11 @@ class AreaTabPane(val actorSystem : ActorSystem) extends BoxPanel(Orientation.Ve
         areaToPageMap += area.name -> canvas
         tabbedPane.pages += new Page(area.name, canvas)
       }
-      areaToPageMap.get(area.name).get.update(area, popByArea(area).toSet)
+      SwingUtilities.invokeLater(new Runnable{
+        def run() {
+          areaToPageMap.get(area.name).get.update(area, popByArea(area).toSet)
+        }
+      })
     }
   }
   

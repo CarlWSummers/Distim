@@ -1,4 +1,4 @@
-package edu.uccs.summers.data.geometry
+package edu.uccs.summers.data.population
 
 import edu.uccs.summers.data.population.PopulationArchetypeDescriptor
 

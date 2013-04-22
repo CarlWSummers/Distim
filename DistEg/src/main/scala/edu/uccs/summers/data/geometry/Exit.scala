@@ -4,7 +4,6 @@ import edu.uccs.summers.data.geometry.shapes.Shape
 import java.awt.Color
 
 class Exit(shape : Shape) extends StaticEntity(shape) {
-  def isCollidable : Boolean = false
   
   def getColor() : Color = {
     Color.GRAY

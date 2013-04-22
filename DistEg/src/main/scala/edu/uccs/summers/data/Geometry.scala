@@ -3,21 +3,27 @@ package edu.uccs.summers.data
 import scala.util.parsing.combinator.JavaTokenParsers
 import scala.io.Source
 import edu.uccs.summers.data.geometry.shapes.Rectangle
-import edu.uccs.summers.data.geometry.shapes.Point
+import edu.uccs.summers.data.geometry.shapes.Vec2d
 import edu.uccs.summers.data.geometry.shapes.Circle
 import edu.uccs.summers.data.geometry.shapes.Shape
 import edu.uccs.summers.data.geometry.shapes.Polygon
 import edu.uccs.summers.data.geometry.AreaTransition
 import edu.uccs.summers.data.geometry.Area
-import edu.uccs.summers.data.geometry.InitialPopulationParameters
+import edu.uccs.summers.data.population.InitialPopulationParameters
 import edu.uccs.summers.data.population.PopulationArchetypeDescriptor
 import scala.collection._
+import edu.uccs.summers.data.geometry.AreaBounds
 
 class Geometry(val areas : List[Area]) {
 }
 
 class GeometryParser(popTypes : mutable.Map[String, PopulationArchetypeDescriptor]) extends JavaTokenParsers {
 
+  /**
+   * http://stackoverflow.com/questions/5952720/ignoring-c-style-comments-in-a-scala-combinator-parser
+  **/
+  protected override val whiteSpace = """(\s|//.*|(?m)/\*(\*(?!/)|[^*])*\*/)+""".r
+  
   def areaList = rep(areaDescription)
   
   def areaDescription = ("Area" ~> areaName) ~ ("{" ~> initialPopulationParameters) ~ boundsDefinition ~ (objectList <~ "}") ^^ {
@@ -38,7 +44,9 @@ class GeometryParser(popTypes : mutable.Map[String, PopulationArchetypeDescripto
     case min ~ max => (min.toInt,max.toInt)
   }
   
-  def boundsDefinition = "Bounds" ~> "{" ~> (shapeDef <~ "}")
+  def boundsDefinition = "Bounds" ~> "{" ~> (shapeDef <~ "}") ^^ {
+    case shape => new AreaBounds(shape)
+  }
   
   def objectList = rep(objectDescription)
   
@@ -97,10 +105,10 @@ class GeometryParser(popTypes : mutable.Map[String, PopulationArchetypeDescripto
   }
   
   def pointDesc = ("(" ~> wholeNumber) ~ ("," ~> wholeNumber) <~ ")" ^^ {
-    case x ~ y => Point(x.toInt, y.toInt)
+    case x ~ y => Vec2d(x.toInt, y.toInt)
   }
   
-  def pointList : Parser[List[Point]] = (
+  def pointList : Parser[List[Vec2d]] = (
       pointDesc ~ ("," ~> pointList) ^^ {
         case point ~ list => point :: list
       }

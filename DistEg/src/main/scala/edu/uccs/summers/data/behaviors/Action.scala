@@ -6,7 +6,7 @@ import edu.uccs.summers.data.Topography
 import edu.uccs.summers.data.Open
 import edu.uccs.summers.data.Person
 import edu.uccs.summers.data.TerrainType
-import edu.uccs.summers.data.geometry.shapes.Point
+import edu.uccs.summers.data.geometry.shapes.Vec2d
 
 class Action (val parentAction : Option[Action], val body : String){
   
@@ -25,7 +25,8 @@ class RandomWalk extends Action(None, "") {
     val p = ctx.dereference("person").asInstanceOf[Person]
     val rnd = ctx.dereference("Random").asInstanceOf[Random]
 //    val newVelocity = Point(0, -5)
-    return Person(p.id, p.executor, p.position, p.velocity, p.currentArea)
+//    return Person(p.id, p.executor, p.position, p.velocity, p.currentArea)
+    return p
   }
 }
 

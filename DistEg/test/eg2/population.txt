@@ -1,0 +1,6 @@
+Population {
+  def Simple {
+    Behavior : BehaviorTest
+    Properties : {}
+  }
+}

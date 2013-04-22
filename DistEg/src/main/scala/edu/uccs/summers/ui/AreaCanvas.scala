@@ -10,6 +10,8 @@ import scala.swing.event.MouseDragged
 import scala.swing.event.MouseWheelMoved
 import java.awt.Color
 import edu.uccs.summers.data.Person
+import edu.uccs.summers.data.geometry.shapes.Rectangle
+import edu.uccs.summers.data.geometry.shapes.Vec2d
 
 class AreaCanvas extends Panel {
 
@@ -63,12 +65,9 @@ class AreaCanvas extends Panel {
   }
   
   override def paintComponent(g : Graphics2D){
-    if(area == null) {
-      super.paintComponent(g);
-      return
-    }
     background = Color.LIGHT_GRAY
-    super.paintComponent(g);
+    super.paintComponent(g)
+    if(area == null) return
     
     g.translate(size.width / 2, size.height / 2)
     g.scale(scaleFactor, scaleFactor)
@@ -77,7 +76,22 @@ class AreaCanvas extends Panel {
     
     g.setColor(Color.MAGENTA)
     pop.foreach(person => {
-      g.fillOval(Math.round(person.position.x).toInt - 1, Math.round(person.position.y).toInt - 1, 3, 3)
+      val dyn = person.dynamics
+      val halfWidth = Math.round(dyn.width / 2).toInt
+      
+      g.fillOval(Math.round(dyn.position.x).toInt - halfWidth, Math.round(dyn.position.y).toInt - halfWidth, dyn.width.toInt, dyn.width.toInt)
+      g.setColor(Color.RED)
+      val next = person.dynamics.position + person.dynamics.velocity
+      g.drawLine(Math.round(person.dynamics.position.x).toInt, Math.round(person.dynamics.position.y).toInt, Math.round(next.x).toInt, Math.round(next.y).toInt)
+      g.setColor(Color.RED.darker)
+      val nextTwo = person.dynamics.position + (person.dynamics.velocity * 2)
+      g.drawLine(Math.round(next.x).toInt, Math.round(next.y).toInt, Math.round(nextTwo.x).toInt,  Math.round(nextTwo.y).toInt)
+      val obj = person.dynamics
+      
+      val aabb = Rectangle(obj.position - Vec2d(halfWidth, halfWidth), dyn.width.toInt, dyn.width.toInt)
+      g.drawRect(aabb.ul.x.toInt, aabb.ul.y.toInt, aabb.width.toInt, aabb.height.toInt)
+      g.setColor(Color.BLACK)
+      g.drawOval(obj.position.x.toInt, obj.position.y.toInt, 1, 1)
     })
   }
 }

@@ -1,69 +1,22 @@
-Area Area1 {
-  Population {
-    Create 4 to 40 persons of types (Simple)
-  }
-  
-  Bounds {
-    circle 
-      center : (300, 400)
-      radius : 1000
-  }
-  
-  Wall {
-    polygon (0,0), (0, 100), (100, 100), (100, 0)
-  }
-
-  Transition {
-    t1
-    circle
-      center : (300,400)
-      radius : 50
-    transition to Area2 t1
-  }
-}
-
-Area Area2 {
-  Population {
-    Create 4 to 40 persons of types (Simple)
-  }
-  
-  Bounds {
-    rectangle upper left (0, 0) to lower right (1000, 1000)
-  }
-  
-  Wall {
-    rectangle upper left (100,200) to lower right (105,300)
-  }
-  
-  Wall {
-    rectangle starting at (3,4) with width 4 and height 5
-  }
-
-  Exit {
-    circle
-      center : (3,4)
-      radius : 4
-  }
-
-  Transition {
-    t1
-    circle 
-      center : (103,100)
-      radius : 15
-    transition to Area1 t1
-  }
-}
-
 Area CollisionTest {
   Population {
-    Create 15 to 16 persons of types (Simple)
+    Create 1 to 1 persons of types (Simple)
   }
   
   Bounds {
-    rectangle upper left (0, 0) to lower right (100, 100)
+    rectangle upper left (5,5) to lower right (95, 95)
   }
-  
+ 
   Wall {
-    rectangle starting at (30, 40) with width 30 and height 10
+    rectangle upper left (0,0) to lower right(5, 100)
+  }
+  Wall {
+    rectangle upper left (5,0) to lower right(95, 5)
+  }
+  Wall {
+    rectangle upper left (5,95) to lower right(95, 100)
+  }
+  Wall {
+    rectangle upper left (95,0) to lower right(100, 100)
   }
 }

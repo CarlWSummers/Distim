@@ -5,27 +5,21 @@ import edu.uccs.summers.messages.Compute
 import edu.uccs.summers.data.Person
 import edu.uccs.summers.messages.SimulationStepPartialResult
 import edu.uccs.summers.data.Person
-import edu.uccs.summers.data.geometry.shapes.Point
+import edu.uccs.summers.data.geometry.shapes.Vec2d
+import edu.uccs.summers.data.geometry.Collidable
+import edu.uccs.summers.math.Algorithms
+import edu.uccs.summers.data.population.PhysicalProperties
 
 class SimulationStepExecutor extends Actor{
   
   def receive = {
     case Compute(area, pop, responseDest) => {
       val updatedPop = pop.map(person => {
-        var currentPos = person.position
+        val currentPos = person.dynamics.position
         val updatedPerson = person.update(area, pop)
-        var currentVel = person.velocity
-        area.objects.foreach(t => {
-          if(t.isCollidable){
-            val collision = t.resolveCollision(currentPos, currentVel)
-            collision.foreach( p => {
-              currentPos = p._1
-              currentVel = p._2
-              Person(person.id, person.executor, p._1, p._2, area)
-            })
-          }
-        })
-        Person(person.id, person.executor, currentPos + currentVel, currentVel, area)
+        val currentVel = person.dynamics.velocity
+        val dynamics = Algorithms.resolveCollisions(PhysicalProperties(currentPos, currentVel, updatedPerson.dynamics.width, updatedPerson.dynamics.mass), area.collidables)
+        Person(person.id, person.executor, dynamics, area)
       })
       responseDest ! SimulationStepPartialResult(updatedPop)
     }

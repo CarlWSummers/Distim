@@ -60,6 +60,7 @@ class ControlPanel(actorSystem : ActorSystem, simMaster : ActorRef, areaTabPanel
               simulationListener ! Forward(simMaster, SimulationInitialize(
                 new SimulationInitData(chooser.selectedFile)))
             }
+            case _ => {} 
           }
         }catch{
           case e : Exception => {
