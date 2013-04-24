@@ -1,17 +1,49 @@
 package edu.uccs.summers.data.geometry
 
-import edu.uccs.summers.data.geometry.shapes.Shape
 import java.awt.Color
-import edu.uccs.summers.data.geometry.shapes.Vec2d
+import org.jbox2d.collision.{shapes => jBoxShapes}
+import org.jbox2d.dynamics.BodyDef
+import org.jbox2d.dynamics.BodyType
+import org.jbox2d.dynamics.World
+import edu.uccs.summers.data.geometry.shapes.Circle
+import edu.uccs.summers.data.geometry.shapes.Shape
+import edu.uccs.summers.data.geometry.shapes.Rectangle
+import edu.uccs.summers.data.geometry.shapes.Polygon
+import org.jbox2d.dynamics.FixtureDef
+import java.awt.Graphics2D
+import org.jbox2d.dynamics.Body
+import org.jbox2d.common.Vec2
 
-class Wall(shape : Shape) extends StaticEntity(shape) with Collidable{
+class Wall(shape : Shape) extends StaticEntity(shape) {
+  
+  private var body : Body = null
   def isCollidable : Boolean = true
   
   def getColor() : Color = {
-    Color.BLACK
+    Color.WHITE
   }
   
   def getShape() = shape
+  
+  override def init(world : World) : Unit = {
+    val bodyDef = new BodyDef
+    bodyDef.`type` = BodyType.STATIC
+    bodyDef.allowSleep = true
+    bodyDef.fixedRotation = true
+    bodyDef.position = shape.getOrigin
+    body = world.createBody(bodyDef)
+    
+    val fixDef : FixtureDef = new FixtureDef
+    fixDef.shape = shape.createCollidable
+    body.createFixture(fixDef)
+  }
+  
+  override def draw(g : Graphics2D, convertScalar : Float => Float, convertVec2 : Vec2 => Vec2) : Unit = {
+    val oldColor = g.getColor;
+    g.setColor(getColor)
+    shape.draw(g, convertScalar, convertVec2)
+    g.setColor(oldColor)
+  }
 }
 
 object Wall{

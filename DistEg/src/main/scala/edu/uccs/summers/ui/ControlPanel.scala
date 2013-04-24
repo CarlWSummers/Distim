@@ -23,6 +23,9 @@ import edu.uccs.summers.messages.InitFailed
 import edu.uccs.summers.messages.Forward
 import edu.uccs.summers.messages.SimulationSpeed
 import scala.swing.event.ButtonClicked
+import edu.uccs.summers.messages.SimulationStart
+import edu.uccs.summers.messages.SimulationStop
+import java.util.prefs.Preferences
 
 class ControlPanel(actorSystem : ActorSystem, simMaster : ActorRef, areaTabPanel : AreaTabPane) extends BoxPanel(Orientation.Vertical){
 
@@ -43,8 +46,18 @@ class ControlPanel(actorSystem : ActorSystem, simMaster : ActorRef, areaTabPanel
     listenTo(this)
     reactions += {
       case ButtonClicked(_) =>
-        tickBtn.enabled = false
-        text = "Pause"
+        text match {
+          case "Run" =>
+            tickBtn.enabled = false
+            text = "Pause"
+            simMaster ! SimulationStart
+            
+          case "Pause" =>
+            tickBtn.enabled = true
+            text = "Run"
+            simMaster ! SimulationStop
+            
+        }
     }
   }
   
@@ -52,13 +65,14 @@ class ControlPanel(actorSystem : ActorSystem, simMaster : ActorRef, areaTabPanel
     listenTo(this)
     reactions += {
       case ButtonClicked(_) => {
-        val chooser = new FileChooser(new File("."))
+        val chooser = new FileChooser(new File(Preferences.userRoot().node("DistEg").get("lastFile", ".")))
         chooser.title = "Load Simulation"
         try{
           chooser.showOpenDialog(null) match {
             case FileChooser.Result.Approve => {
               simulationListener ! Forward(simMaster, SimulationInitialize(
                 new SimulationInitData(chooser.selectedFile)))
+              Preferences.userRoot().node("DistEg").put("lastFile", chooser.selectedFile.getCanonicalPath())
             }
             case _ => {} 
           }

@@ -12,11 +12,11 @@ import java.awt.Color
 import edu.uccs.summers.data.Person
 import edu.uccs.summers.data.geometry.shapes.Rectangle
 import edu.uccs.summers.data.geometry.shapes.Vec2d
+import org.jbox2d.common.Vec2
 
 class AreaCanvas extends Panel {
 
   private var area : Area = null
-  private var pop : Set[Person] = null
   
   private var translateX = 0.0;
   private var translateY = 0.0;
@@ -27,7 +27,7 @@ class AreaCanvas extends Panel {
   
   focusable = false
   opaque = true
-  
+  println("NEW");
   listenTo(mouse.clicks, mouse.moves, mouse.wheel)
   reactions += {
     case MouseEntered(_,_,_) => drawMouseCoords = true; 
@@ -51,9 +51,8 @@ class AreaCanvas extends Panel {
     }
   }
 
-  def update(area : Area, pop : Set[Person]){
+  def update(area : Area){
     this.area = area
-    this.pop = pop
     repaint
   }
   
@@ -65,33 +64,26 @@ class AreaCanvas extends Panel {
   }
   
   override def paintComponent(g : Graphics2D){
-    background = Color.LIGHT_GRAY
+    background = Color.BLACK
     super.paintComponent(g)
     if(area == null) return
+    val m = g.getTransform();
     
     g.translate(size.width / 2, size.height / 2)
     g.scale(scaleFactor, scaleFactor)
     g.translate(translateX, translateY)
-    area.draw(g);
-    
-    g.setColor(Color.MAGENTA)
-    pop.foreach(person => {
-      val dyn = person.dynamics
-      val halfWidth = Math.round(dyn.width / 2).toInt
-      
-      g.fillOval(Math.round(dyn.position.x).toInt - halfWidth, Math.round(dyn.position.y).toInt - halfWidth, dyn.width.toInt, dyn.width.toInt)
-      g.setColor(Color.RED)
-      val next = person.dynamics.position + person.dynamics.velocity
-      g.drawLine(Math.round(person.dynamics.position.x).toInt, Math.round(person.dynamics.position.y).toInt, Math.round(next.x).toInt, Math.round(next.y).toInt)
-      g.setColor(Color.RED.darker)
-      val nextTwo = person.dynamics.position + (person.dynamics.velocity * 2)
-      g.drawLine(Math.round(next.x).toInt, Math.round(next.y).toInt, Math.round(nextTwo.x).toInt,  Math.round(nextTwo.y).toInt)
-      val obj = person.dynamics
-      
-      val aabb = Rectangle(obj.position - Vec2d(halfWidth, halfWidth), dyn.width.toInt, dyn.width.toInt)
-      g.drawRect(aabb.ul.x.toInt, aabb.ul.y.toInt, aabb.width.toInt, aabb.height.toInt)
-      g.setColor(Color.BLACK)
-      g.drawOval(obj.position.x.toInt, obj.position.y.toInt, 1, 1)
-    })
+    drawAxes(g)
+    g.setColor(Color.WHITE)
+    area.draw(g, (f) => (scaleFactor * f).toFloat, (vec) => new Vec2((vec.x * scaleFactor).toFloat, (-vec.y * scaleFactor).toFloat));
+    g.setTransform(m)
+  }
+  
+  def drawAxes(g : Graphics2D){
+    val scaledThousand = (1000 * scaleFactor).toInt
+    g.drawLine(0, -scaledThousand, 0, scaledThousand)
+    g.drawLine(-scaledThousand, 0, scaledThousand, 0)
+    val width = Math.max(1, (5 * scaleFactor).toInt)
+    -1000 to 1000 by 10 map (i => (i * scaleFactor).toInt) foreach (i => {g.drawLine(-width, i, width, i)})
+    -1000 to 1000 by 10 map (i => (i * scaleFactor).toInt) foreach (i => {g.drawLine(i, -width, i, width)})
   }
 }

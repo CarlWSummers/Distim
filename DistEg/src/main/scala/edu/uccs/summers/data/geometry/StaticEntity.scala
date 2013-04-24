@@ -5,15 +5,12 @@ import java.awt.Graphics2D
 import java.awt.Color
 import edu.uccs.summers.data.geometry.shapes.Vec2d
 import edu.uccs.summers.data.population.PhysicalProperties
-import edu.uccs.summers.math.Algorithms
+import org.jbox2d.dynamics.World
+import org.jbox2d.common.Vec2
 
 abstract class StaticEntity(shape : Shape) {
-  def draw(g : Graphics2D) : Unit = {
-    val oldColor = g.getColor;
-    g.setColor(getColor)
-    shape.draw(g)
-    g.setColor(oldColor)
-  }
   
+  def draw(g : Graphics2D, convertScalar : Float => Float, convertVec2 : Vec2 => Vec2) : Unit
+  def init(world : World) = {}
   def getColor() : Color
 }

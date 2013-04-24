@@ -8,7 +8,7 @@ import edu.uccs.summers.messages.SimulationStepResult
 import scala.swing.Panel
 import scala.swing.BoxPanel
 import scala.swing.Orientation
-import edu.uccs.summers.data.Geometry
+import edu.uccs.summers.data.geometry.Geometry
 import akka.actor.ActorSystem
 import akka.actor.Props
 import java.awt.Dimension
@@ -29,15 +29,7 @@ class AreaTabPane(val actorSystem : ActorSystem) extends BoxPanel(Orientation.Ve
   
   val areaToPageMap = mutable.Map[String, AreaCanvas]()
 
-  def update(geometry : Geometry, pop : Set[Person]){
-    val popByArea = pop.foldLeft(mutable.Map[Area, mutable.Set[Person]]())((areaToPeopleMap, person) => {
-      if(!areaToPeopleMap.contains(person.currentArea)){
-        areaToPeopleMap.put(person.currentArea, mutable.Set())
-      }
-      areaToPeopleMap(person.currentArea) += person
-      areaToPeopleMap
-    })
-    
+  def update(geometry : Geometry){
     for(area <- geometry.areas){
       if(!areaToPageMap.contains(area.name)){
         val canvas = new AreaCanvas
@@ -46,7 +38,7 @@ class AreaTabPane(val actorSystem : ActorSystem) extends BoxPanel(Orientation.Ve
       }
       SwingUtilities.invokeLater(new Runnable{
         def run() {
-          areaToPageMap.get(area.name).get.update(area, popByArea(area).toSet)
+          areaToPageMap.get(area.name).get.update(area)
         }
       })
     }
@@ -66,8 +58,8 @@ class AreaTabPaneSimulationListener() extends Actor {
   private var parent : AreaTabPane = null
   
   def receive = {
-    case SimulationStepResult(geometry, pop) => {
-      parent.update(geometry, pop)
+    case SimulationStepResult(geometry) => {
+      parent.update(geometry)
     }
     
     case SimulationClear => {

@@ -4,7 +4,6 @@ import scala.collection._
 import scala.collection.mutable
 import scala.io.Source
 import scala.util.Random
-
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
@@ -12,8 +11,8 @@ import akka.actor.Props
 import akka.actor.UntypedActorFactory
 import akka.actor.actorRef2Scala
 import akka.routing.RoundRobinRouter
-import edu.uccs.summers.data.Geometry
-import edu.uccs.summers.data.GeometryParser
+import edu.uccs.summers.data.geometry.Geometry
+import edu.uccs.summers.data.geometry.GeometryParser
 import edu.uccs.summers.data.Person
 import edu.uccs.summers.data.SimulationInitData
 import edu.uccs.summers.data.behaviors.Behavior
@@ -36,6 +35,11 @@ import edu.uccs.summers.messages.SimulationInitialize
 import edu.uccs.summers.messages.SimulationStepExecutionComplete
 import edu.uccs.summers.messages.SimulationStepRequest
 import edu.uccs.summers.messages.SimulationStepResult
+import edu.uccs.summers.messages.Compute
+import edu.uccs.summers.messages.SimulationStart
+import scala.concurrent.duration._
+import akka.actor.Cancellable
+import edu.uccs.summers.messages.SimulationStop
 
 class SimulationMaster(system : ActorSystem) extends Actor{
   
@@ -45,10 +49,11 @@ class SimulationMaster(system : ActorSystem) extends Actor{
   
   private var initialized = false;
   private var geometry : Geometry = null
-  private var latestPopulation : Set[Person] = Set()
   
   private var popExecs : ActorRef = null
   private var popAggregator : ActorRef = null
+  
+  var schedule : Cancellable = null
   
   def receive = {
     case SimulationInitialize(s) => {
@@ -56,28 +61,31 @@ class SimulationMaster(system : ActorSystem) extends Actor{
         case InitSuccessful => {
           sender ! InitSuccessful
           listeners.foreach(_ ! SimulationClear)
-          listeners.foreach(_ ! SimulationStepResult(geometry, latestPopulation.toSet))
+          listeners.foreach(_ ! SimulationStepResult(geometry))
         }
         case e : InitFailed => sender ! e
       } 
     }
     
-    case SimulationStepExecutionComplete(newPop) => {
-      latestPopulation = newPop
-      listeners.foreach(_ ! SimulationStepResult(geometry, newPop))
+    case SimulationStepExecutionComplete(geometry) => {
+      this.geometry = geometry
+      listeners.foreach(_ ! SimulationStepResult(geometry))
+    }
+    
+    case SimulationStart => {
+      import system.dispatcher
+      schedule = context.system.scheduler.schedule(0 second, 100 millis, self, SimulationStepRequest)
+    }
+
+    case SimulationStop => {
+      if(schedule != null){
+        schedule.cancel
+        schedule = null
+      }
     }
     
     case SimulationStepRequest => {
-      val popByArea = latestPopulation.foldLeft(mutable.Map[Area, mutable.Set[Person]]())((areaToPeopleMap, person) => {
-        if(!areaToPeopleMap.contains(person.currentArea)){
-          areaToPeopleMap.put(person.currentArea, mutable.Set())
-        }
-        areaToPeopleMap(person.currentArea) += person
-        areaToPeopleMap
-      })
-      popByArea.foreach((tuple) => {
-        popExecs ! Compute(tuple._1, tuple._2.toSet, popAggregator)
-      })
+      geometry.areas.foreach(area => popExecs ! Compute(area, popAggregator))
     }
     
     case AddSimulationListener(listener) => {
@@ -86,10 +94,13 @@ class SimulationMaster(system : ActorSystem) extends Actor{
   }
   
   def initSim(initData : SimulationInitData) : SimulationInitializationResult = {
+    if(schedule != null){
+      schedule.cancel
+      schedule = null
+    }
     behaviors.clear
     popArchTypes.clear
     geometry = null
-    latestPopulation = Set()
     popExecs = null
     popAggregator = null
     
@@ -113,25 +124,15 @@ class SimulationMaster(system : ActorSystem) extends Actor{
         return InitFailed("Failed to parse Population file:" + e)
     }
 
-    val geometryParser = new GeometryParser(popArchTypes)
-    geometryParser.parseAll(geometryParser.areaList , Source.fromFile(initData.geometryFile).bufferedReader) match {
+    val rnd = Random
+    val geometryParser = new GeometryParser(popArchTypes, rnd)
+    geometryParser.parseAll(geometryParser.geometry , Source.fromFile(initData.geometryFile).bufferedReader) match {
       case geometryParser.Success(r, t) => 
-        geometry = new Geometry(r)
+        geometry = r
       case e => 
         println("Failed to parse Geometry File:" + e)
         return InitFailed("Failed to parse Geometry file:" + e)
     }
-
-    val rnd = Random
-    geometry.areas.foreach(area => {
-      val maxPop = area.popParams.maxSize
-      val minPop = area.popParams.minSize
-      val count = if(maxPop == minPop) minPop else rnd.nextInt(maxPop - minPop) + minPop
-      val fixmeType = area.popParams.popTypes.head
-      for(i <- 0 to count - 1){
-        latestPopulation += PopulationFactory.createPerson(area.name + "_" + i, fixmeType, area)
-      }
-    })
     
     popExecs = context.actorOf(Props[SimulationStepExecutor].withRouter(RoundRobinRouter(geometry.areas.size)))
     popAggregator = context.actorOf(Props(new SimulationStepAggregator(geometry.areas.size)))

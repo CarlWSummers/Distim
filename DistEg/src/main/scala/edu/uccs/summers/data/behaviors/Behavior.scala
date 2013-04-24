@@ -4,7 +4,7 @@ import scala.util.Random
 import edu.uccs.summers.data.Open
 import edu.uccs.summers.data.Person
 import edu.uccs.summers.data.Topography
-import edu.uccs.summers.data.Geometry
+import edu.uccs.summers.data.geometry.Geometry
 import edu.uccs.summers.data.geometry.Area
 
 

@@ -1,33 +1,36 @@
-package edu.uccs.summers.data
+package edu.uccs.summers.data.geometry
 
+import scala.collection.mutable
 import scala.util.parsing.combinator.JavaTokenParsers
-import scala.io.Source
+import org.jbox2d.common.Vec2
+import org.jbox2d.dynamics.World
+import edu.uccs.summers.data.geometry.shapes.Circle
+import edu.uccs.summers.data.geometry.shapes.Polygon
 import edu.uccs.summers.data.geometry.shapes.Rectangle
 import edu.uccs.summers.data.geometry.shapes.Vec2d
-import edu.uccs.summers.data.geometry.shapes.Circle
-import edu.uccs.summers.data.geometry.shapes.Shape
-import edu.uccs.summers.data.geometry.shapes.Polygon
-import edu.uccs.summers.data.geometry.AreaTransition
-import edu.uccs.summers.data.geometry.Area
 import edu.uccs.summers.data.population.InitialPopulationParameters
 import edu.uccs.summers.data.population.PopulationArchetypeDescriptor
-import scala.collection._
-import edu.uccs.summers.data.geometry.AreaBounds
+import scala.util.Random
 
-class Geometry(val areas : List[Area]) {
-}
+case class Geometry(val areas : List[Area])
 
-class GeometryParser(popTypes : mutable.Map[String, PopulationArchetypeDescriptor]) extends JavaTokenParsers {
+class GeometryParser(popTypes : mutable.Map[String, PopulationArchetypeDescriptor], rnd : Random) extends JavaTokenParsers {
 
   /**
    * http://stackoverflow.com/questions/5952720/ignoring-c-style-comments-in-a-scala-combinator-parser
   **/
   protected override val whiteSpace = """(\s|//.*|(?m)/\*(\*(?!/)|[^*])*\*/)+""".r
   
+  def geometry = areaList ^^ {
+    case areas => {
+      Geometry(areas)
+    }
+  }
+  
   def areaList = rep(areaDescription)
   
   def areaDescription = ("Area" ~> areaName) ~ ("{" ~> initialPopulationParameters) ~ boundsDefinition ~ (objectList <~ "}") ^^ {
-    case name ~ popParams ~ bounds ~ entityList => Area(name, bounds, entityList, popParams)
+    case name ~ popParams ~ bounds ~ entityList => Area(name, bounds, entityList, popParams, rnd)
   }
   
   def areaName = ident
@@ -44,7 +47,7 @@ class GeometryParser(popTypes : mutable.Map[String, PopulationArchetypeDescripto
     case min ~ max => (min.toInt,max.toInt)
   }
   
-  def boundsDefinition = "Bounds" ~> "{" ~> (shapeDef <~ "}") ^^ {
+  def boundsDefinition = "Bounds" ~> "{" ~> (rectangleParameters <~ "}") ^^ {
     case shape => new AreaBounds(shape)
   }
   
@@ -105,10 +108,10 @@ class GeometryParser(popTypes : mutable.Map[String, PopulationArchetypeDescripto
   }
   
   def pointDesc = ("(" ~> wholeNumber) ~ ("," ~> wholeNumber) <~ ")" ^^ {
-    case x ~ y => Vec2d(x.toInt, y.toInt)
+    case x ~ y => new Vec2(x.toFloat, y.toFloat)
   }
   
-  def pointList : Parser[List[Vec2d]] = (
+  def pointList : Parser[List[Vec2]] = (
       pointDesc ~ ("," ~> pointList) ^^ {
         case point ~ list => point :: list
       }

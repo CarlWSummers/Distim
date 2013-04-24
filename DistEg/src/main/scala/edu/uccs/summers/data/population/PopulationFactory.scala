@@ -5,13 +5,13 @@ import edu.uccs.summers.data.geometry.Area
 import edu.uccs.summers.data.behaviors.Behavior
 import scala.util.Random
 import edu.uccs.summers.data.geometry.shapes.Vec2d
+import org.jbox2d.common.Vec2
 
 object PopulationFactory {
   val rnd = Random
   
-  def createPerson(id : String, descriptor : PopulationArchetypeDescriptor, area : Area) : Person = {
-//    val person = Person(id, null, PhysicalProperties(area.generateSpawnPoint, Vec2d(rnd.nextInt(10), rnd.nextInt(10)), 30, 1), area)
-    val person = Person(id, null, PhysicalProperties(area.generateSpawnPoint, Vec2d(5,0), 30, 1), area)
+  def createPerson(id : String, descriptor : PopulationArchetypeDescriptor) : Person = {
+    val person = Person(id, null, PhysicalProperties(new Vec2(0, 0), new Vec2(rnd.nextInt(10) - 5, rnd.nextInt(10) - 5), 30, 1))
     person.executor = descriptor.behavior.executor(person)
     return person
   }

@@ -1,22 +1,21 @@
 Area CollisionTest {
   Population {
-    Create 1 to 1 persons of types (Simple)
+    Create 5000 to 5000 persons of types (Simple)
   }
   
   Bounds {
-    rectangle upper left (5,5) to lower right (95, 95)
+    upper left (-100,200) to lower right (200, -100)
   }
  
   Wall {
-    rectangle upper left (0,0) to lower right(5, 100)
+    rectangle upper left (0, 35) to lower right (35, 0)
   }
+
   Wall {
-    rectangle upper left (5,0) to lower right(95, 5)
+    circle center : (50, 50) radius : 35
   }
+  
   Wall {
-    rectangle upper left (5,95) to lower right(95, 100)
-  }
-  Wall {
-    rectangle upper left (95,0) to lower right(100, 100)
+    polygon (-45, 65), (-35, 130), (0, 50)
   }
 }

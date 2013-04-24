@@ -1,19 +1,25 @@
 package edu.uccs.summers.messages
 
 import edu.uccs.summers.data.SimulationInitData
-import edu.uccs.summers.data.Geometry
+import edu.uccs.summers.data.geometry.Geometry
 import akka.actor.Actor
 import akka.actor.ActorRef
 import edu.uccs.summers.data.Person
+import edu.uccs.summers.data.geometry.Area
+import edu.uccs.summers.data.geometry.Geometry
 
 sealed trait SimulationMessage
 case class SimulationInitialize(init : SimulationInitData) extends SimulationMessage
 case object SimulationClear extends SimulationMessage
 
 case object SimulationStepRequest extends SimulationMessage
-case class SimulationStepResult(g : Geometry, pop : Set[Person]) extends SimulationMessage
-case class SimulationStepPartialResult(partialPop : Set[Person]) extends SimulationMessage
-case class SimulationStepExecutionComplete(population : Set[Person]) extends SimulationMessage
+case object SimulationStart extends SimulationMessage
+case object SimulationStop extends SimulationMessage
+
+case class SimulationStepResult(g : Geometry) extends SimulationMessage
+case class SimulationStepPartialResult(newArea : Area) extends SimulationMessage
+case class SimulationStepExecutionComplete(geometry : Geometry) extends SimulationMessage
+case class Compute(area : Area, resultDest : ActorRef) extends SimulationMessage
 
 case class SimulationSpeed(speed : Int) extends SimulationMessage
 
