@@ -2,7 +2,6 @@ package edu.uccs.summers.data.geometry
 
 import java.awt.Graphics2D
 import java.awt.Color
-import edu.uccs.summers.data.geometry.shapes.Vec2d
 import scala.collection._
 import scala.util.Random
 import edu.uccs.summers.data.geometry.shapes.Shape
@@ -15,10 +14,15 @@ import org.jbox2d.dynamics.BodyDef
 import org.jbox2d.dynamics.BodyType
 import edu.uccs.summers.data.population.PopulationFactory
 import edu.uccs.summers.data.Person
+import java.io.ObjectOutputStream
+import java.io.ObjectInputStream
+import org.jbox2d.serialization.pb.PbSerializer
+import org.jbox2d.serialization.pb.PbDeserializer
 
-class Area(val name : String, val boundingShape : AreaBounds, val objects : List[StaticEntity], val pop : immutable.Set[Person], rnd : Random) {
+class Area(val name : String, val boundingShape : AreaBounds, val objects : List[StaticEntity], val pop : immutable.Set[Person], rnd : Random) extends Serializable{
   
-  private val world = new World(new Vec2(0f, 0f))
+  @transient 
+  private var world = new World(new Vec2(0f, 0f))
   boundingShape.init(world)
   objects.foreach(_.init(world))
   pop.foreach(_.init(world, this))
@@ -45,7 +49,22 @@ class Area(val name : String, val boundingShape : AreaBounds, val objects : List
   }
   
   def update() = {
-    world.step(1, 3, 12)
+    pop.foreach(_.update(this, pop))
+    for(i <- 0 to 60){
+      world.step(1/60.0f, 3, 12)
+    }
+  }
+  
+  private def writeObject(out: ObjectOutputStream): Unit = {
+    val serializer = new PbSerializer
+    out.write(serializer.serializeWorld(world).build.toByteArray())
+    out.defaultWriteObject();
+  }
+  
+  private def readObject(in: ObjectInputStream): Unit = {
+    val deserializer = new PbDeserializer
+    world = deserializer.deserializeWorld(in)
+    in.defaultReadObject()
   }
 }
 

@@ -1,36 +1,35 @@
 package edu.uccs.summers.ui
 
-import akka.actor.ActorRef
+import java.io.File
+import java.util.prefs.Preferences
+import scala.concurrent.duration.DurationInt
 import scala.swing.BoxPanel
 import scala.swing.Button
+import scala.swing.FileChooser
 import scala.swing.Orientation
 import scala.swing.Slider
 import scala.swing.event.ButtonClicked
 import scala.swing.event.ValueChanged
-import scala.swing.FileChooser
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
-import akka.actor.Props
 import akka.actor.Actor
-import java.io.File
+import akka.actor.ActorContext
+import akka.actor.ActorRef
+import akka.actor.Props
+import akka.actor.actorRef2Scala
 import edu.uccs.summers.data.SimulationInitData
-import edu.uccs.summers.messages.SimulationInitialize
-import edu.uccs.summers.messages.SimulationStepRequest
-import edu.uccs.summers.messages.SimulationStepResult
-import javax.swing.JOptionPane
-import edu.uccs.summers.messages.InitSuccessful
-import edu.uccs.summers.messages.InitFailed
 import edu.uccs.summers.messages.Forward
+import edu.uccs.summers.messages.InitFailed
+import edu.uccs.summers.messages.InitSuccessful
+import edu.uccs.summers.messages.SimulationInitialize
 import edu.uccs.summers.messages.SimulationSpeed
-import scala.swing.event.ButtonClicked
 import edu.uccs.summers.messages.SimulationStart
+import edu.uccs.summers.messages.SimulationStepRequest
 import edu.uccs.summers.messages.SimulationStop
-import java.util.prefs.Preferences
+import javax.swing.JOptionPane
+import edu.uccs.summers.data.SimulationInitDataParser
 
-class ControlPanel(actorSystem : ActorSystem, simMaster : ActorRef, areaTabPanel : AreaTabPane) extends BoxPanel(Orientation.Vertical){
+class ControlPanel(actorSystem : ActorContext, simMaster : ActorRef, areaTabPanel : AreaTabPane) extends BoxPanel(Orientation.Vertical){
 
-  val simulationListener = actorSystem.actorOf(Props[ControlPanelSimulationListener])
-  simulationListener ! this
+  val simulationListener = actorSystem.actorOf(Props(new ControlPanelSimulationListener(this)))
   
   private val tickBtn = new Button("Tick") {
     listenTo(this)
@@ -71,7 +70,7 @@ class ControlPanel(actorSystem : ActorSystem, simMaster : ActorRef, areaTabPanel
           chooser.showOpenDialog(null) match {
             case FileChooser.Result.Approve => {
               simulationListener ! Forward(simMaster, SimulationInitialize(
-                new SimulationInitData(chooser.selectedFile)))
+                new SimulationInitData(new SimulationInitDataParser().parse(chooser.selectedFile))))
               Preferences.userRoot().node("DistEg").put("lastFile", chooser.selectedFile.getCanonicalPath())
             }
             case _ => {} 
@@ -87,16 +86,17 @@ class ControlPanel(actorSystem : ActorSystem, simMaster : ActorRef, areaTabPanel
   
   private val speedSlider = new Slider {
     listenTo(this)
-    max = 3010
+    max = 1510
     min = 10
-    value = 2710
+    value = 1310
     majorTickSpacing = 100
+    minorTickSpacing = 10
     paintTicks = true
     snapToTicks = true
     
     reactions += {
       case ValueChanged(_) if !adjusting => {
-        simulationListener ! Forward(simMaster, SimulationSpeed(value))
+        simulationListener ! Forward(simMaster, SimulationSpeed((max - value + min) milliseconds))
       }
     }
   }
@@ -119,13 +119,9 @@ class ControlPanel(actorSystem : ActorSystem, simMaster : ActorRef, areaTabPanel
   }
 }
 
-class ControlPanelSimulationListener() extends Actor {
-  private var parent : ControlPanel = null
+class ControlPanelSimulationListener(parent : ControlPanel) extends Actor {
   
   def receive = {
-    case parent : ControlPanel => {
-      this.parent = parent
-    }
     case InitSuccessful => {
       println("SUCCESS")
     }

@@ -11,26 +11,25 @@ import scala.swing.event.MouseWheelMoved
 import java.awt.Color
 import edu.uccs.summers.data.Person
 import edu.uccs.summers.data.geometry.shapes.Rectangle
-import edu.uccs.summers.data.geometry.shapes.Vec2d
 import org.jbox2d.common.Vec2
 
 class AreaCanvas extends Panel {
 
   private var area : Area = null
   
-  private var translateX = 0.0;
-  private var translateY = 0.0;
-  private var scaleFactor = 1.0;
-  private var drawMouseCoords = false;
-  private var mouseX = 0;
-  private var mouseY = 0;
+  private var translateX = 0.0
+  private var translateY = 0.0
+  private var scaleFactor = 1.5
+  private var drawMouseCoords = false
+  private var mouseX = 0
+  private var mouseY = 0
   
   focusable = false
   opaque = true
   println("NEW");
   listenTo(mouse.clicks, mouse.moves, mouse.wheel)
   reactions += {
-    case MouseEntered(_,_,_) => drawMouseCoords = true; 
+    case MouseEntered(_,_,_) => drawMouseCoords = true 
     case MouseExited(_,_,_) => drawMouseCoords = false
     case MouseMoved(_,p,_) => {
       mouseX = p.getX.intValue
@@ -53,13 +52,14 @@ class AreaCanvas extends Panel {
 
   def update(area : Area){
     this.area = area
+    println("scheduled paint");
     repaint
   }
   
   def reset(){
     translateX = 0
     translateY = 0
-    scaleFactor = 1.0
+    scaleFactor = 1.5
     repaint
   }
   

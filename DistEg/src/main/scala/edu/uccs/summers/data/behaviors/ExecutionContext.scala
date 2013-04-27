@@ -2,7 +2,7 @@ package edu.uccs.summers.data.behaviors
 
 import scala.collection.mutable.Map
 
-case class ExecutionContext(parentContext : Option[ExecutionContext]){
+case class ExecutionContext(parentContext : Option[ExecutionContext]) extends Serializable{
 
   private val bindings = Map[String, Any]()
   

@@ -2,13 +2,11 @@ package edu.uccs.summers.data.behaviors
 
 import edu.uccs.summers.data.Person
 import scala.util.Random
-import edu.uccs.summers.data.Topography
-import edu.uccs.summers.data.Open
 import edu.uccs.summers.data.Person
-import edu.uccs.summers.data.TerrainType
-import edu.uccs.summers.data.geometry.shapes.Vec2d
+import org.jbox2d.common.Vec2
+import edu.uccs.summers.data.population.PhysicalProperties
 
-class Action (val parentAction : Option[Action], val body : String){
+class Action (val parentAction : Option[Action], val body : String) extends Serializable{
   
   def perform(ctx : ExecutionContext) : Person = {
     var person = ctx.dereference("person").asInstanceOf[Person]
@@ -24,9 +22,12 @@ class RandomWalk extends Action(None, "") {
   override def perform(ctx : ExecutionContext) : Person = {
     val p = ctx.dereference("person").asInstanceOf[Person]
     val rnd = ctx.dereference("Random").asInstanceOf[Random]
-//    val newVelocity = Point(0, -5)
-//    return Person(p.id, p.executor, p.position, p.velocity, p.currentArea)
-    return p
+    
+    val newHeading = Math.atan2(p.body.getLinearVelocity().y, p.body.getLinearVelocity().x) + (15 * Math.PI / 180)
+//    val newVelocity = new Vec2(Math.sin(newHeading).toFloat, Math.cos(newHeading).toFloat)
+    val newVelocity = new Vec2(if(rnd.nextBoolean) -rnd.nextFloat else rnd.nextFloat, if(rnd.nextBoolean) -rnd.nextFloat else rnd.nextFloat)
+    val newDynamics = PhysicalProperties(p.dynamics.position, newVelocity, p.dynamics.width, p.dynamics.mass)
+    return Person(p.id, p.executor, newDynamics)
   }
 }
 

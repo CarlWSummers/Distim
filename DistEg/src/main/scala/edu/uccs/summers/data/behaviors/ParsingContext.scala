@@ -1,16 +1,14 @@
 package edu.uccs.summers.data.behaviors
 
 import edu.uccs.summers.data.Person
-import edu.uccs.summers.data.Topography
 import scala.reflect.runtime.universe._
 import scala.reflect.api._
 
-class ParsingContext() {
+class ParsingContext() extends Serializable {
   
   val classMap = Map[String, Class[_]](
     "person" -> classOf[Person],
-    "people" -> classOf[Set[Person]],
-    "environment" -> classOf[Topography]
+    "people" -> classOf[Set[Person]]
   )
   
   def classForId(id : String) = classMap(id)

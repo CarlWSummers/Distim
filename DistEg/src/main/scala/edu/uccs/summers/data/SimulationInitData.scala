@@ -5,23 +5,28 @@ import scala.util.parsing.combinator.JavaTokenParsers
 import scala.collection.immutable.Nil
 import scala.io.Source
 
-case class SimulationInitData(initDataFile : File){
+case class SimulationInitData(files : List[File]) extends Serializable {
   private val parser = new SimulationInitDataParser
-  private val files = parser.parseAll(parser.fileData, Source.fromFile(initDataFile).bufferedReader)
-
-  files match {
-    case parser.Failure(e,t) => {
-      println(t)
-      throw new Exception(e)
-    }
-    case _ =>
-  }
-  val geometryFile = files.get.head
-  val populationFile = files.get.tail.head
-  val behaviorsFile = files.get.last
+  val geometryFile = files.head
+  val populationFile = files.tail.head
+  val behaviorsFile = files.last
 }
 
-class SimulationInitDataParser extends JavaTokenParsers {
+class SimulationInitDataParser extends JavaTokenParsers with Serializable {
+  
+  def parse(initDataFile : File) = {
+    val files = this.parseAll(this.fileData, Source.fromFile(initDataFile).bufferedReader)
+
+    files match {
+      case this.Failure(e, t) => {
+        println(t)
+        throw new Exception(e)
+      }
+      case _ =>
+    }
+    files.get
+  }
+  
   def fileData = geometryFileDef ~ populationFileDef ~ behaviorsFileDef ^^ {
     case geo ~ pop ~ behavior => geo :: pop :: behavior :: Nil
   }

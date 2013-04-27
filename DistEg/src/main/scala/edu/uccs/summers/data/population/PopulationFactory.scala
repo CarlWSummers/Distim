@@ -4,7 +4,6 @@ import edu.uccs.summers.data.Person
 import edu.uccs.summers.data.geometry.Area
 import edu.uccs.summers.data.behaviors.Behavior
 import scala.util.Random
-import edu.uccs.summers.data.geometry.shapes.Vec2d
 import org.jbox2d.common.Vec2
 
 object PopulationFactory {

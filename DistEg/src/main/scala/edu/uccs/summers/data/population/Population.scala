@@ -4,7 +4,7 @@ import scala.util.parsing.combinator.JavaTokenParsers
 import edu.uccs.summers.data.behaviors.Behavior
 import scala.collection._
 
-case class PopulationArchetypeDescriptor(name : String, behavior : Behavior, props : Map[String, Any]) {
+case class PopulationArchetypeDescriptor(name : String, behavior : Behavior, props : Map[String, Any]) extends Serializable {
   
 }
 

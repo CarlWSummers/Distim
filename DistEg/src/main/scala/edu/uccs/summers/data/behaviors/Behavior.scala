@@ -1,14 +1,12 @@
 package edu.uccs.summers.data.behaviors
 
 import scala.util.Random
-import edu.uccs.summers.data.Open
 import edu.uccs.summers.data.Person
-import edu.uccs.summers.data.Topography
 import edu.uccs.summers.data.geometry.Geometry
 import edu.uccs.summers.data.geometry.Area
 
 
-class Behavior (val name : String, val states : List[State]){
+class Behavior (val name : String, val states : List[State]) extends Serializable{
   val nullState = new State("", false, null, null)
   def executor (p : Person) = new BehaviorExecutor(this)
   def stateOf(s : String, default : State) : State = {
@@ -16,7 +14,7 @@ class Behavior (val name : String, val states : List[State]){
   }
 }
 
-class BehaviorExecutor(val behavior : Behavior) {
+class BehaviorExecutor(val behavior : Behavior) extends Serializable {
   import BehaviorExecutor.{badState, nullState}
   
   var currentState : State = (nullState /: behavior.states)((a, b) => 

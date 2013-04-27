@@ -7,12 +7,11 @@ import org.jbox2d.dynamics.World
 import edu.uccs.summers.data.geometry.shapes.Circle
 import edu.uccs.summers.data.geometry.shapes.Polygon
 import edu.uccs.summers.data.geometry.shapes.Rectangle
-import edu.uccs.summers.data.geometry.shapes.Vec2d
 import edu.uccs.summers.data.population.InitialPopulationParameters
 import edu.uccs.summers.data.population.PopulationArchetypeDescriptor
 import scala.util.Random
 
-case class Geometry(val areas : List[Area])
+case class Geometry(val areas : List[Area]) extends Serializable
 
 class GeometryParser(popTypes : mutable.Map[String, PopulationArchetypeDescriptor], rnd : Random) extends JavaTokenParsers {
 

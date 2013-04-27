@@ -9,10 +9,7 @@ import scala.swing.Panel
 import scala.swing.SimpleSwingApplication
 import scala.swing.Slider
 import com.typesafe.config.ConfigFactory
-import akka.actor.ActorSystem
-import akka.actor.Cancellable
 import edu.uccs.summers.actors.SimulationMaster
-import edu.uccs.summers.data.Topography
 import edu.uccs.summers.data.behaviors.Action
 import edu.uccs.summers.data.behaviors.Behavior
 import edu.uccs.summers.data.behaviors.BehaviorsParser
@@ -24,30 +21,63 @@ import edu.uccs.summers.ui.AreaTabPane
 import edu.uccs.summers.ui.AreaTabPane
 import edu.uccs.summers.ui.AreaTabPane
 import edu.uccs.summers.ui.ControlPanel
-import akka.actor.Props
 import edu.uccs.summers.messages.AddSimulationListener
+import akka.actor.{ ActorRef, Props, Actor, ActorSystem, Cancellable }
+import scala.concurrent.duration._
+import edu.uccs.summers.messages.Forward
+import edu.uccs.summers.messages.SimulationListing
+import javax.swing.JOptionPane
+import edu.uccs.summers.ui.SimulationListing
+import edu.uccs.summers.messages.SimulationListingReponse
+import edu.uccs.summers.messages.SimulationReference
+import javax.swing.SwingUtilities
 
 object Main extends SimpleSwingApplication{
   
-  val base = "test/eg1/"
+  val system = ActorSystem("DistEg", ConfigFactory.load().getConfig("remotelookup"))
+  val host = JOptionPane.showInputDialog("Remote IP", "192.168.0.104")
+  val port = JOptionPane.showInputDialog("Remote Port", "13552")
+  val simCoordinator = system.actorFor("akka://SimulationCoordination@" + host + ":" + port+ "/user/coordinator")
   
-  val config = ConfigFactory.load()
-  val system = ActorSystem("DistEg") //, config.getConfig("DistEg").withFallback(config))
-  val simulationMaster = system.actorOf(Props(new SimulationMaster(system)))
-  
-  val tabbedPane = new AreaTabPane(system)
-  simulationMaster ! AddSimulationListener(tabbedPane.simulationListener)
-  
-  lazy val areaPanes = tabbedPane
-  lazy val controlPanel = new ControlPanel(system, simulationMaster, tabbedPane)
-  
-  lazy val mainUi : Panel = new BoxPanel(Orientation.Vertical){ 
-    contents += areaPanes
-    contents += controlPanel
+  lazy val mainUi : BoxPanel = new BoxPanel(Orientation.Vertical){ 
+    contents += simulationListingPanel
   }
+
+  val simulationListingPanel = new SimulationListing(simCoordinator)
+  val simClient = system.actorOf(Props(new SimulationClient(simulationListingPanel, mainUi)))
+  simulationListingPanel.simulationClient = simClient
+  simClient ! Forward(simCoordinator, SimulationListing)
   
   def top = new MainFrame {
     title = "Distributed Egress"
     contents = mainUi;
+  }
+}
+
+class SimulationClient(listingPanel : SimulationListing, mainUI : BoxPanel) extends Actor {
+  def receive = {
+    case Forward(dest, message) => {
+      dest ! message
+    }
+    
+    case SimulationListingReponse(values) => {
+      listingPanel.updateListing(values)
+    }
+    
+    case SimulationReference(simMaster) => {
+      println("Received Reference");
+      SwingUtilities.invokeLater(new Runnable(){
+        def run() {
+          val tabbedPane = new AreaTabPane(context)
+          simMaster ! AddSimulationListener(tabbedPane.simulationListener)
+          val areaPanes = tabbedPane
+          val controlPanel = new ControlPanel(context, simMaster, tabbedPane)
+          mainUI.contents.clear
+          mainUI.contents += areaPanes
+          mainUI.contents += controlPanel
+          mainUI.repaint
+        }
+      })
+    }
   }
 }

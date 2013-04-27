@@ -11,7 +11,7 @@ trait Expression {
   def apply(ctx : ExecutionContext) : Any 
 }
 
-trait BooleanExpression extends Expression {
+trait BooleanExpression extends Expression with Serializable{
   override def apply(ctx : ExecutionContext) : Boolean
 }
 

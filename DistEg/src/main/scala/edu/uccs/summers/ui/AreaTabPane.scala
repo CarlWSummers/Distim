@@ -17,15 +17,15 @@ import edu.uccs.summers.data.geometry.Area
 import edu.uccs.summers.messages.SimulationClear
 import scala.swing.Swing
 import javax.swing.SwingUtilities
+import akka.actor.ActorContext
 
-class AreaTabPane(val actorSystem : ActorSystem) extends BoxPanel(Orientation.Vertical) {
+class AreaTabPane(val actorSystem : ActorContext) extends BoxPanel(Orientation.Vertical) {
   import TabbedPane._
 
   val tabbedPane = new TabbedPane
   contents += tabbedPane
   preferredSize = new Dimension(600, 800)
-  val simulationListener = actorSystem.actorOf(Props[AreaTabPaneSimulationListener])
-  simulationListener ! this
+  val simulationListener = actorSystem.actorOf(Props(new AreaTabPaneSimulationListener(this)))
   
   val areaToPageMap = mutable.Map[String, AreaCanvas]()
 
@@ -54,20 +54,16 @@ class AreaTabPane(val actorSystem : ActorSystem) extends BoxPanel(Orientation.Ve
   }
 }
 
-class AreaTabPaneSimulationListener() extends Actor {
-  private var parent : AreaTabPane = null
-  
+class AreaTabPaneSimulationListener(parent : AreaTabPane) extends Actor {
+
   def receive = {
     case SimulationStepResult(geometry) => {
+      println("Received Update");
       parent.update(geometry)
     }
     
     case SimulationClear => {
       parent.clear()
-    }
-    
-    case parent : AreaTabPane => {
-      this.parent = parent
     }
   }
 }

@@ -6,7 +6,6 @@ import scala.io.Source
 import scala.util.Random
 import akka.actor.Actor
 import akka.actor.ActorRef
-import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.actor.UntypedActorFactory
 import akka.actor.actorRef2Scala
@@ -40,8 +39,9 @@ import edu.uccs.summers.messages.SimulationStart
 import scala.concurrent.duration._
 import akka.actor.Cancellable
 import edu.uccs.summers.messages.SimulationStop
+import edu.uccs.summers.messages.SimulationSpeed
 
-class SimulationMaster(system : ActorSystem) extends Actor{
+class SimulationMaster() extends Actor{
   
   private val listeners = scala.collection.mutable.Set[ActorRef]()
   private val behaviors = mutable.Map[String, Behavior]()
@@ -54,6 +54,8 @@ class SimulationMaster(system : ActorSystem) extends Actor{
   private var popAggregator : ActorRef = null
   
   var schedule : Cancellable = null
+  var run = false;
+  var simulationSpeed = 1000 milliseconds
   
   def receive = {
     case SimulationInitialize(s) => {
@@ -73,22 +75,31 @@ class SimulationMaster(system : ActorSystem) extends Actor{
     }
     
     case SimulationStart => {
-      import system.dispatcher
-      schedule = context.system.scheduler.schedule(0 second, 100 millis, self, SimulationStepRequest)
+      import context.dispatcher
+      run = true
+      schedule = context.system.scheduler.scheduleOnce(0 seconds, self, SimulationStepRequest)
     }
 
     case SimulationStop => {
       if(schedule != null){
+        run = false
         schedule.cancel
         schedule = null
       }
     }
     
     case SimulationStepRequest => {
+      import context.dispatcher
       geometry.areas.foreach(area => popExecs ! Compute(area, popAggregator))
+      if (run) schedule = context.system.scheduler.scheduleOnce(simulationSpeed, self, SimulationStepRequest)
+    }
+    
+    case SimulationSpeed(newDuration) => {
+      simulationSpeed = newDuration
     }
     
     case AddSimulationListener(listener) => {
+      println("Adding simulation listener");
       addSimulationListener(listener)
     }
   }

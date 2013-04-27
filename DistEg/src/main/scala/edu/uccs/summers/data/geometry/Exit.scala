@@ -5,7 +5,7 @@ import java.awt.Color
 import org.jbox2d.common.Vec2
 import java.awt.Graphics2D
 
-class Exit(shape : Shape) extends StaticEntity(shape) {
+class Exit(shape : Shape) extends StaticEntity(shape) with Serializable {
   
   def draw(g : Graphics2D, convertScalar : Float => Float, convertVec2 : Vec2 => Vec2) : Unit = {
     throw new UnsupportedOperationException
