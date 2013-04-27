@@ -17,6 +17,7 @@ import scala.swing.ScrollPane
 import scala.swing.event.SelectionChanged
 import edu.uccs.summers.messages.SimulationLookup
 import scala.swing.event.MouseClicked
+import javax.swing.JOptionPane
 
 class SimulationListing(simCoordinator : ActorRef) extends BoxPanel(Orientation.Vertical){
   
@@ -39,7 +40,8 @@ class SimulationListing(simCoordinator : ActorRef) extends BoxPanel(Orientation.
   contents += new Button("Start new Simulation"){
     reactions += {
       case ButtonClicked(_) => {
-        _simulationClient ! Forward(simCoordinator, SimulationCreate("NEEEW"))
+        val simulationName = JOptionPane.showInputDialog("Simulation Name", "New")
+        _simulationClient ! Forward(simCoordinator, SimulationCreate(simulationName))
       }
     }
   }
@@ -50,7 +52,6 @@ class SimulationListing(simCoordinator : ActorRef) extends BoxPanel(Orientation.
   def updateListing(simulations : Set[String]) = {
     SwingUtilities.invokeLater(new Runnable(){
       def run() = {
-        println("Updating client listing")
         listing.listData = simulations.toSeq
         repaint
       }

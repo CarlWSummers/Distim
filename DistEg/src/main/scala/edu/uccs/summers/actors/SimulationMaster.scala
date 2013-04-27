@@ -41,6 +41,7 @@ import scala.concurrent.duration._
 import akka.actor.Cancellable
 import edu.uccs.summers.messages.SimulationStop
 import edu.uccs.summers.messages.SimulationSpeed
+import edu.uccs.summers.messages.RemoveSimulationListener
 
 class SimulationMaster() extends Actor{
   
@@ -99,8 +100,11 @@ class SimulationMaster() extends Actor{
     }
     
     case AddSimulationListener(listener) => {
-      println("Adding simulation listener")
       addSimulationListener(listener)
+    }
+    
+    case RemoveSimulationListener(listener) => {
+      removeSimulationListener(listener)
     }
   }
   
@@ -155,6 +159,10 @@ class SimulationMaster() extends Actor{
   
   def addSimulationListener(listener : ActorRef){
     listeners.add(listener)
+  }
+  
+  def removeSimulationListener(listener : ActorRef){
+    listeners.remove(listener)
   }
   
 }

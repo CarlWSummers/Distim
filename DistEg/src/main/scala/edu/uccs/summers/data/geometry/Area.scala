@@ -3,15 +3,17 @@ package edu.uccs.summers.data.geometry
 import scala.collection.immutable
 import scala.collection.mutable
 import scala.util.Random
-
 import org.jbox2d.common.Vec2
 import org.jbox2d.dynamics.World
-
 import edu.uccs.summers.data.Person
 import edu.uccs.summers.data.dto.HasDTO
 import edu.uccs.summers.data.dto.geometry.{Area => AreaDTO}
 import edu.uccs.summers.data.population.InitialPopulationParameters
 import edu.uccs.summers.data.population.PopulationFactory
+import org.jbox2d.callbacks.ContactListener
+import org.jbox2d.dynamics.contacts.Contact
+import org.jbox2d.callbacks.ContactImpulse
+import org.jbox2d.collision.Manifold
 
 class Area(val name : String, val boundingShape : AreaBounds, val objects : List[StaticEntity], val pop : immutable.Set[Person], rnd : Random) extends Serializable with HasDTO[AreaDTO]{
   
@@ -22,6 +24,45 @@ class Area(val name : String, val boundingShape : AreaBounds, val objects : List
     boundingShape.init(world)
     objects.foreach(_.init(world))
     pop.foreach(_.init(world, this))
+    world.setContactListener(new ContactListener(){
+      def beginContact(contact : Contact) = {
+        (contact.getFixtureA().getBody().getUserData(), contact.getFixtureB().getUserData()) match {
+          case (a : Person, b : Person) => {
+            a.addVisualContact(b)
+          }
+          case _ => {}
+        }
+        (contact.getFixtureA().getUserData(), contact.getFixtureB().getBody().getUserData()) match {
+          case (a : Person, b : Person) => {
+            a.addVisualContact(b)
+          }
+          case _ => {}
+        }
+      }
+    
+      def endContact(contact : Contact) = {
+        (contact.getFixtureA().getBody().getUserData(), contact.getFixtureB().getUserData()) match {
+          case (a : Person, b : Person) => {
+            a.removeVisualContact(b)
+          }
+          case _ => {}
+        }
+        (contact.getFixtureA().getUserData(), contact.getFixtureB().getBody().getUserData()) match {
+          case (a : Person, b : Person) => {
+            a.removeVisualContact(b)
+          }
+          case _ => {}
+        }
+      }
+
+      def preSolve(contact : Contact, oldManifold : Manifold) = {
+        
+      }
+    
+      def postSolve(contact : Contact, impulse : ContactImpulse) = {
+        
+      }
+    })
   }
   def generateSpawnPoint() : Vec2 = {
     boundingShape.shape.generatePointWithin(Area.rnd)

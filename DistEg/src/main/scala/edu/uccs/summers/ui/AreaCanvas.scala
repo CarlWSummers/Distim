@@ -27,7 +27,6 @@ class AreaCanvas extends Panel {
   
   focusable = false
   opaque = true
-  println("NEW")
   listenTo(mouse.clicks, mouse.moves, mouse.wheel)
   reactions += {
     case MouseEntered(_,_,_) => drawMouseCoords = true 
@@ -53,7 +52,6 @@ class AreaCanvas extends Panel {
 
   def update(area : Area){
     this.area = area
-    println("scheduled paint")
     repaint
   }
   

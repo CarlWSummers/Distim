@@ -23,10 +23,10 @@ class RandomWalk extends Action(None, "") {
     val p = ctx.dereference("person").asInstanceOf[Person]
     val rnd = ctx.dereference("Random").asInstanceOf[Random]
     
-    val newHeading = Math.atan2(p.body.getLinearVelocity().y, p.body.getLinearVelocity().x) + (15 * Math.PI / 180)
+    val newHeading = math.toDegrees(math.atan2(p.body.getLinearVelocity().y, p.body.getLinearVelocity().x))
 //    val newVelocity = new Vec2(Math.sin(newHeading).toFloat, Math.cos(newHeading).toFloat)
     val newVelocity = new Vec2(if(rnd.nextBoolean) -rnd.nextFloat else rnd.nextFloat, if(rnd.nextBoolean) -rnd.nextFloat else rnd.nextFloat)
-    val newDynamics = PhysicalProperties(p.dynamics.position, newVelocity, p.dynamics.width, p.dynamics.mass)
+    val newDynamics = PhysicalProperties(p.dynamics.position, newVelocity, newHeading.toFloat, p.dynamics.width, p.dynamics.mass)
     return Person(p.id, p.executor, newDynamics)
   }
 }

@@ -36,3 +36,4 @@ case object InitSuccessful extends SimulationInitializationResult
 case class InitFailed(reason : String) extends SimulationInitializationResult
 
 case class AddSimulationListener(listener : ActorRef)
+case class RemoveSimulationListener(listener : ActorRef)

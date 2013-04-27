@@ -31,6 +31,9 @@ import edu.uccs.summers.ui.SimulationListing
 import edu.uccs.summers.messages.SimulationListingReponse
 import edu.uccs.summers.messages.SimulationReference
 import javax.swing.SwingUtilities
+import edu.uccs.summers.messages.AddSimulationListener
+import edu.uccs.summers.messages.RemoveSimulationListener
+import edu.uccs.summers.messages.RemoveSimulationListener
 
 object Main extends SimpleSwingApplication{
   
@@ -65,7 +68,6 @@ class SimulationClient(listingPanel : SimulationListing, mainUI : BoxPanel) exte
     }
     
     case SimulationReference(simMaster) => {
-      println("Received Reference")
       SwingUtilities.invokeLater(new Runnable(){
         def run() {
           val tabbedPane = new AreaTabPane(context)
@@ -75,7 +77,14 @@ class SimulationClient(listingPanel : SimulationListing, mainUI : BoxPanel) exte
           mainUI.contents.clear
           mainUI.contents += areaPanes
           mainUI.contents += controlPanel
+          mainUI.revalidate
           mainUI.repaint
+
+          Runtime.getRuntime().addShutdownHook(new Thread(){
+            override def run() {
+              simMaster ! RemoveSimulationListener(tabbedPane.simulationListener)
+            }
+          })
         }
       })
     }

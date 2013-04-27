@@ -1,10 +1,10 @@
 Area CollisionTest {
   Population {
-    Create 1 to 1 persons of types (Simple)
+    Create 5 to 5 persons of types (Simple)
   }
   
   Bounds {
-    rectangle upper left (0, 0) to lower right (100, 100)
+    upper left (-10,20) to lower right (20, -10)
   }
   
   Wall {

@@ -33,6 +33,7 @@ class Wall(shape : Shape) extends StaticEntity(shape) with Serializable {
     bodyDef.fixedRotation = true
     bodyDef.position = shape.getOrigin
     body = world.createBody(bodyDef)
+    body.setUserData(this)
     
     val fixDef : FixtureDef = new FixtureDef
     fixDef.shape = shape.createCollidable

@@ -58,7 +58,6 @@ class AreaTabPaneSimulationListener(parent : AreaTabPane) extends Actor {
 
   def receive = {
     case SimulationStepResult(geometry) => {
-      println("Received Update")
       parent.update(geometry)
     }
     
