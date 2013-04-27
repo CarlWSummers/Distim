@@ -3,6 +3,8 @@ package edu.uccs.summers.messages
 import scala.concurrent.duration.FiniteDuration
 import akka.actor.ActorRef
 import edu.uccs.summers.data.SimulationInitData
+import edu.uccs.summers.data.dto.geometry.{Area => AreaDTO}
+import edu.uccs.summers.data.dto.geometry.{Geometry => GeometryDTO}
 import edu.uccs.summers.data.geometry.Area
 import edu.uccs.summers.data.geometry.Geometry
 
@@ -22,10 +24,10 @@ case object SimulationStepRequest extends SimulationMessage
 case object SimulationStart extends SimulationMessage
 case object SimulationStop extends SimulationMessage
 
-case class SimulationStepResult(g : Geometry) extends SimulationMessage
-case class SimulationStepPartialResult(newArea : Area) extends SimulationMessage
-case class SimulationStepExecutionComplete(geometry : Geometry) extends SimulationMessage
-case class Compute(area : Area, resultDest : ActorRef) extends SimulationMessage
+case class SimulationStepResult(g : GeometryDTO) extends SimulationMessage
+case class SimulationStepPartialResult(newArea : AreaDTO) extends SimulationMessage
+case class SimulationStepExecutionComplete(geometry : GeometryDTO) extends SimulationMessage
+case class Compute(resultDest : ActorRef) extends SimulationMessage
 
 case class SimulationSpeed(speed : FiniteDuration) extends SimulationMessage
 

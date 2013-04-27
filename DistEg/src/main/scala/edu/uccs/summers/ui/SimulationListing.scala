@@ -44,14 +44,13 @@ class SimulationListing(simCoordinator : ActorRef) extends BoxPanel(Orientation.
     }
   }
   
-  
   def simulationClient = _simulationClient
   def simulationClient_= (client : ActorRef) = _simulationClient = client
   
   def updateListing(simulations : Set[String]) = {
     SwingUtilities.invokeLater(new Runnable(){
       def run() = {
-        println("Updating client listing");
+        println("Updating client listing")
         listing.listData = simulations.toSeq
         repaint
       }

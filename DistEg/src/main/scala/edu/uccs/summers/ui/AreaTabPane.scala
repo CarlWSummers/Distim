@@ -8,12 +8,12 @@ import edu.uccs.summers.messages.SimulationStepResult
 import scala.swing.Panel
 import scala.swing.BoxPanel
 import scala.swing.Orientation
-import edu.uccs.summers.data.geometry.Geometry
+import edu.uccs.summers.data.dto.geometry.Geometry
 import akka.actor.ActorSystem
 import akka.actor.Props
 import java.awt.Dimension
-import edu.uccs.summers.data.Person
-import edu.uccs.summers.data.geometry.Area
+import edu.uccs.summers.data.dto.population.Person
+import edu.uccs.summers.data.dto.geometry.Area
 import edu.uccs.summers.messages.SimulationClear
 import scala.swing.Swing
 import javax.swing.SwingUtilities
@@ -58,7 +58,7 @@ class AreaTabPaneSimulationListener(parent : AreaTabPane) extends Actor {
 
   def receive = {
     case SimulationStepResult(geometry) => {
-      println("Received Update");
+      println("Received Update")
       parent.update(geometry)
     }
     

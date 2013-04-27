@@ -5,8 +5,6 @@
 	<classpathentry kind="src" output="target/scala-2.10/test-classes" path="src/test/scala"/>
 	<classpathentry kind="src" output="target/scala-2.10/test-classes" path="src/test/java"/>
 	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Users/Summers/.ivy2/cache/com.typesafe.akka/akka-actor_2.10/bundles/akka-actor_2.10-2.1.2.jar" sourcepath="C:/Users/Summers/.m2/repository/com/typesafe/akka/akka-actor_2.10/2.1.2/akka-actor_2.10-2.1.2-sources.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Summers/.ivy2/cache/com.typesafe/config/bundles/config-1.0.0.jar" sourcepath="C:/Users/Summers/.m2/repository/com/typesafe/config/1.0.0/config-1.0.0-sources.jar"/>
 	<classpathentry kind="lib" path="lib/akka-2.1.2/lib/akka/akka-kernel_2.10-2.1.2.jar"/>
 	<classpathentry kind="lib" path="lib/akka-2.1.2/lib/akka/akka-remote_2.10-2.1.2.jar"/>
 	<classpathentry kind="lib" path="lib/akka-2.1.2/lib/akka/protobuf-java-2.4.1.jar"/>
@@ -16,9 +14,7 @@
 	<classpathentry kind="lib" path="lib/JBox2d/2_2_1_1/jbox2d-serialization-1.1.0-javadoc.jar"/>
 	<classpathentry kind="lib" path="lib/JBox2d/2_2_1_1/jbox2d-serialization-1.1.0-sources.jar"/>
 	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_COMPILER_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Users/Summers/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.10.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Summers/.ivy2/cache/org.scala-lang/scala-swing/jars/scala-swing-2.10.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/jbox2d-library"/>
+	<classpathentry kind="lib" path="lib/akka-2.1.2/lib/akka/config-1.0.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

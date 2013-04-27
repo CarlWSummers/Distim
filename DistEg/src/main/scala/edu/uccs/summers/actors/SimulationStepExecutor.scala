@@ -8,13 +8,15 @@ import edu.uccs.summers.messages.SimulationStepPartialResult
 import edu.uccs.summers.data.Person
 import edu.uccs.summers.data.population.PhysicalProperties
 import edu.uccs.summers.messages.Compute
+import edu.uccs.summers.data.geometry.Area
 
-class SimulationStepExecutor extends Actor{
+class SimulationStepExecutor(val area : Area) extends Actor{
+  area.initialize()
   
   def receive = {
-    case Compute(area, responseDest) => {
+    case Compute(responseDest) => {
       area.update
-      responseDest ! SimulationStepPartialResult(area)
+      responseDest ! SimulationStepPartialResult(area.translate)
     }
   }
 }

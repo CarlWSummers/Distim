@@ -2,7 +2,7 @@ package edu.uccs.summers
 
 import java.io.{ StringWriter, PrintWriter }
 
-import javax.script.ScriptException;
+import javax.script.ScriptException
 
 import scala.tools.nsc.interpreter.Results._
 import scala.tools.nsc.{Interpreter => ScalaInterpreter, Settings}
@@ -14,7 +14,7 @@ class Interpreter {
    // http://lampsvn.epfl.ch/svn-repos/scala/scala/trunk/src/compiler/scala/tools/nsc/Interpreter.scala
 
   private val writer = new java.io.StringWriter()
-  private val interpreter = new ScalaInterpreter(new Settings(), new PrintWriter(writer));
+  private val interpreter = new ScalaInterpreter(new Settings(), new PrintWriter(writer))
 
   /**
    * Bind the given value to the given variable name in the interpreter
@@ -37,7 +37,7 @@ class Interpreter {
     writer.getBuffer.setLength(0)
 
     // Execute the code and catch the result
-    val ir = interpreter.interpret(code);
+    val ir = interpreter.interpret(code)
 
     // Return value or throw an exception based on result
     ir match {
@@ -62,10 +62,10 @@ class Interpreter {
 
     // Create an object to hold the result and bind in the interpreter
     val holder = new ResultHolder(null)
-    bind("$result__", holder);
+    bind("$result__", holder)
 
     // Execute the code and catch the result
-    val ir = interpreter.interpret("$result__.value = " + code);
+    val ir = interpreter.interpret("$result__.value = " + code)
 
     // Return value or throw an exception based on result
     ir match {

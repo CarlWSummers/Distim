@@ -1,17 +1,18 @@
 package edu.uccs.summers.ui
 
-import scala.swing.Panel
-import edu.uccs.summers.data.geometry.Area
+import java.awt.Color
 import java.awt.Graphics2D
+
+import scala.swing.Panel
+import scala.swing.event.MouseDragged
 import scala.swing.event.MouseEntered
 import scala.swing.event.MouseExited
 import scala.swing.event.MouseMoved
-import scala.swing.event.MouseDragged
 import scala.swing.event.MouseWheelMoved
-import java.awt.Color
-import edu.uccs.summers.data.Person
-import edu.uccs.summers.data.geometry.shapes.Rectangle
+
 import org.jbox2d.common.Vec2
+
+import edu.uccs.summers.data.dto.geometry.Area
 
 class AreaCanvas extends Panel {
 
@@ -26,7 +27,7 @@ class AreaCanvas extends Panel {
   
   focusable = false
   opaque = true
-  println("NEW");
+  println("NEW")
   listenTo(mouse.clicks, mouse.moves, mouse.wheel)
   reactions += {
     case MouseEntered(_,_,_) => drawMouseCoords = true 
@@ -52,7 +53,7 @@ class AreaCanvas extends Panel {
 
   def update(area : Area){
     this.area = area
-    println("scheduled paint");
+    println("scheduled paint")
     repaint
   }
   
@@ -67,14 +68,14 @@ class AreaCanvas extends Panel {
     background = Color.BLACK
     super.paintComponent(g)
     if(area == null) return
-    val m = g.getTransform();
+    val m = g.getTransform()
     
     g.translate(size.width / 2, size.height / 2)
     g.scale(scaleFactor, scaleFactor)
     g.translate(translateX, translateY)
     drawAxes(g)
     g.setColor(Color.WHITE)
-    area.draw(g, (f) => (scaleFactor * f).toFloat, (vec) => new Vec2((vec.x * scaleFactor).toFloat, (-vec.y * scaleFactor).toFloat));
+    area.draw(g, (f) => (scaleFactor * f).toFloat, (vec) => new Vec2((vec.x * scaleFactor).toFloat, (-vec.y * scaleFactor).toFloat))
     g.setTransform(m)
   }
   

@@ -17,18 +17,12 @@ import org.jbox2d.serialization.pb.PbSerializer
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import org.jbox2d.serialization.pb.PbDeserializer
+import edu.uccs.summers.data.dto.geometry.{Wall => WallDTO}
 
 class Wall(shape : Shape) extends StaticEntity(shape) with Serializable {
 
-  @transient
-  private var world : World = null
-  @transient
   private var body : Body = null
   def isCollidable : Boolean = true
-  
-  def getColor() : Color = {
-    Color.WHITE
-  }
   
   def getShape() = shape
   
@@ -45,27 +39,17 @@ class Wall(shape : Shape) extends StaticEntity(shape) with Serializable {
     body.createFixture(fixDef)
   }
   
-  override def draw(g : Graphics2D, convertScalar : Float => Float, convertVec2 : Vec2 => Vec2) : Unit = {
-    val oldColor = g.getColor;
-    g.setColor(getColor)
-    shape.draw(g, convertScalar, convertVec2)
-    g.setColor(oldColor)
-  }
+//  override def draw(g : Graphics2D, convertScalar : Float => Float, convertVec2 : Vec2 => Vec2) : Unit = {
+//    val oldColor = g.getColor;
+//    g.setColor(getColor)
+//    shape.draw(g, convertScalar, convertVec2)
+//    g.setColor(oldColor)
+//  }
 
-  private def writeObject(out: ObjectOutputStream): Unit = {
-    val serializer = new PbSerializer
-    out.write(serializer.serializeWorld(world).build.toByteArray())
-    out.write(serializer.serializeBody(body).build.toByteArray())
-    out.defaultWriteObject();
+  def translate() : WallDTO = {
+    new WallDTO(shape)
   }
   
-  private def readObject(in: ObjectInputStream): Unit = {
-    val deserializer = new PbDeserializer
-    world = deserializer.deserializeWorld(in)
-    body = deserializer.deserializeBody(world, in)
-    in.defaultReadObject()
-  }
-
 }
 
 object Wall{

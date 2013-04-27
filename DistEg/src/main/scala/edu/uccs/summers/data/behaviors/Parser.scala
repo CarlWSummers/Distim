@@ -21,8 +21,8 @@ import edu.uccs.summers.data.behaviors.interpreter.True
 import edu.uccs.summers.data.behaviors.interpreter.VariableExpression
 
 class BehaviorsParser(context : ParsingContext) extends JavaTokenParsers with PackratParsers{
-  val bindings = new HashMap[String, Any];
-  val stateMap = new HashMap[String, State];
+  val bindings = new HashMap[String, Any]
+  val stateMap = new HashMap[String, State]
   
   def behaviorListing = rep(behavior)
   
@@ -166,5 +166,5 @@ class BehaviorsParser(context : ParsingContext) extends JavaTokenParsers with Pa
   
   def bind(key : String, obj : Any) = bindings += key -> obj
   def retreiveBinding[T](key : String) = bindings.get(key).asInstanceOf[T]
-  def retrieveBinding[T](key : String, default : T) : T = bindings.getOrElse(key, default).asInstanceOf[T];
+  def retrieveBinding[T](key : String, default : T) : T = bindings.getOrElse(key, default).asInstanceOf[T]
 }

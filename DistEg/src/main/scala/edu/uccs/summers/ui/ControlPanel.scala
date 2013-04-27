@@ -77,7 +77,7 @@ class ControlPanel(actorSystem : ActorContext, simMaster : ActorRef, areaTabPane
           }
         }catch{
           case e : Exception => {
-            JOptionPane.showMessageDialog(null, e.getMessage(), "Error loading Simulation", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error loading Simulation", JOptionPane.ERROR_MESSAGE)
           }
         }
       }
@@ -111,7 +111,7 @@ class ControlPanel(actorSystem : ActorContext, simMaster : ActorRef, areaTabPane
   contents += new BoxPanel(Orientation.Horizontal){
     contents += new Button("Reset") {
       reactions += {
-        case ButtonClicked(_) => areaTabPanel.reset();
+        case ButtonClicked(_) => areaTabPanel.reset()
       }
     }
     contents += new Button("Toggle Labels") {

@@ -199,7 +199,7 @@ case class MemberAccessExpression(value : Expression, member : String) extends E
       case v : Variable => {
         val obj = v.apply(ctx)
         val clazz = obj.getClass
-        val field = clazz.getDeclaredField(member);
+        val field = clazz.getDeclaredField(member)
         field.setAccessible(true)
         val result = field.get(obj)
         Variable(result)

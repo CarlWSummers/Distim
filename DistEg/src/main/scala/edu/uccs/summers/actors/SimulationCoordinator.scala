@@ -41,7 +41,7 @@ class SimulationCoordinator extends Actor {
     }
     
     case SimulationListing => {
-      println("Simulation listing request received");
+      println("Simulation listing request received")
       sender ! SimulationListingReponse(simulations.keySet.toSet)
     }
 

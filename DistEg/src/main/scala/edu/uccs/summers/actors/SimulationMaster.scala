@@ -20,6 +20,7 @@ import edu.uccs.summers.data.behaviors.Idle
 import edu.uccs.summers.data.behaviors.MoveDirect
 import edu.uccs.summers.data.behaviors.ParsingContext
 import edu.uccs.summers.data.behaviors.RandomWalk
+import edu.uccs.summers.data.dto.geometry.{Geometry => GeometryDTO}
 import edu.uccs.summers.data.geometry.Area
 import edu.uccs.summers.data.population.PopulationArchetypeDescriptor
 import edu.uccs.summers.data.population.PopulationFactory
@@ -47,14 +48,14 @@ class SimulationMaster() extends Actor{
   private val behaviors = mutable.Map[String, Behavior]()
   private val popArchTypes = mutable.Map[String, PopulationArchetypeDescriptor]()
   
-  private var initialized = false;
+  private var initialized = false
   private var geometry : Geometry = null
   
   private var popExecs : ActorRef = null
   private var popAggregator : ActorRef = null
   
   var schedule : Cancellable = null
-  var run = false;
+  var run = false
   var simulationSpeed = 1000 milliseconds
   
   def receive = {
@@ -63,14 +64,13 @@ class SimulationMaster() extends Actor{
         case InitSuccessful => {
           sender ! InitSuccessful
           listeners.foreach(_ ! SimulationClear)
-          listeners.foreach(_ ! SimulationStepResult(geometry))
+          self ! SimulationStepRequest
         }
         case e : InitFailed => sender ! e
       } 
     }
     
     case SimulationStepExecutionComplete(geometry) => {
-      this.geometry = geometry
       listeners.foreach(_ ! SimulationStepResult(geometry))
     }
     
@@ -90,7 +90,7 @@ class SimulationMaster() extends Actor{
     
     case SimulationStepRequest => {
       import context.dispatcher
-      geometry.areas.foreach(area => popExecs ! Compute(area, popAggregator))
+      geometry.areas.foreach(area => popExecs ! Compute(popAggregator))
       if (run) schedule = context.system.scheduler.scheduleOnce(simulationSpeed, self, SimulationStepRequest)
     }
     
@@ -99,7 +99,7 @@ class SimulationMaster() extends Actor{
     }
     
     case AddSimulationListener(listener) => {
-      println("Adding simulation listener");
+      println("Adding simulation listener")
       addSimulationListener(listener)
     }
   }
@@ -145,14 +145,16 @@ class SimulationMaster() extends Actor{
         return InitFailed("Failed to parse Geometry file:" + e)
     }
     
-    popExecs = context.actorOf(Props[SimulationStepExecutor].withRouter(RoundRobinRouter(geometry.areas.size)))
-    popAggregator = context.actorOf(Props(new SimulationStepAggregator(geometry.areas.size)))
+    val execs = geometry.areas.map(area => context.actorOf(Props(new SimulationStepExecutor(area))))
+    popExecs = context.actorOf(Props().withRouter(RoundRobinRouter(routees = execs)))
+    popAggregator = context.actorOf(Props(new SimulationStepAggregator(execs.size)))
     
-    initialized = true;
+    initialized = true
     return InitSuccessful
   }
   
   def addSimulationListener(listener : ActorRef){
     listeners.add(listener)
   }
+  
 }

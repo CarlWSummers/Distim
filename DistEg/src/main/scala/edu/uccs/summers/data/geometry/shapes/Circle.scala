@@ -12,7 +12,7 @@ class Circle(val center : Vec2, val radius : Float) extends Shape {
     val worldCenter = convertVec2(center)
     val worldRadius = convertScalar(radius)
     val worldDiameter = worldRadius * 2
-    g.fill(new Ellipse2D.Float(worldCenter.x - worldRadius, worldCenter.y - worldRadius, worldDiameter, worldDiameter));
+    g.fill(new Ellipse2D.Float(worldCenter.x - worldRadius, worldCenter.y - worldRadius, worldDiameter, worldDiameter))
   }
   
   def generatePointWithin(rnd : Random) : Vec2 = {

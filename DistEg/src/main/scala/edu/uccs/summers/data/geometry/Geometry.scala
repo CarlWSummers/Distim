@@ -10,8 +10,14 @@ import edu.uccs.summers.data.geometry.shapes.Rectangle
 import edu.uccs.summers.data.population.InitialPopulationParameters
 import edu.uccs.summers.data.population.PopulationArchetypeDescriptor
 import scala.util.Random
+import edu.uccs.summers.data.dto.HasDTO
+import edu.uccs.summers.data.dto.geometry.{Geometry => GeometryDTO}
 
-case class Geometry(val areas : List[Area]) extends Serializable
+case class Geometry(val areas : List[Area]) extends Serializable with HasDTO[GeometryDTO] {
+  def translate() : GeometryDTO = {
+    new GeometryDTO(areas.map(_.translate))
+  }
+}
 
 class GeometryParser(popTypes : mutable.Map[String, PopulationArchetypeDescriptor], rnd : Random) extends JavaTokenParsers {
 

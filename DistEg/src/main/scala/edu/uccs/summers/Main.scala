@@ -35,7 +35,7 @@ import javax.swing.SwingUtilities
 object Main extends SimpleSwingApplication{
   
   val system = ActorSystem("DistEg", ConfigFactory.load().getConfig("remotelookup"))
-  val host = JOptionPane.showInputDialog("Remote IP", "192.168.0.104")
+  val host = JOptionPane.showInputDialog("Remote IP", "127.0.0.1")
   val port = JOptionPane.showInputDialog("Remote Port", "13552")
   val simCoordinator = system.actorFor("akka://SimulationCoordination@" + host + ":" + port+ "/user/coordinator")
   
@@ -50,7 +50,7 @@ object Main extends SimpleSwingApplication{
   
   def top = new MainFrame {
     title = "Distributed Egress"
-    contents = mainUi;
+    contents = mainUi
   }
 }
 
@@ -65,7 +65,7 @@ class SimulationClient(listingPanel : SimulationListing, mainUI : BoxPanel) exte
     }
     
     case SimulationReference(simMaster) => {
-      println("Received Reference");
+      println("Received Reference")
       SwingUtilities.invokeLater(new Runnable(){
         def run() {
           val tabbedPane = new AreaTabPane(context)

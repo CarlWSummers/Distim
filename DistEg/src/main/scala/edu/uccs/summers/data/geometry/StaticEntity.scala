@@ -6,10 +6,9 @@ import java.awt.Color
 import edu.uccs.summers.data.population.PhysicalProperties
 import org.jbox2d.dynamics.World
 import org.jbox2d.common.Vec2
+import edu.uccs.summers.data.dto.HasDTO
+import edu.uccs.summers.data.dto.geometry.{StaticEntity => SeDTO}
 
-abstract class StaticEntity(shape : Shape) extends Serializable {
-  
-  def draw(g : Graphics2D, convertScalar : Float => Float, convertVec2 : Vec2 => Vec2) : Unit
+abstract class StaticEntity(shape : Shape) extends Serializable with HasDTO[SeDTO]{
   def init(world : World) = {}
-  def getColor() : Color
 }
