@@ -8,75 +8,71 @@ import org.jbox2d.dynamics.World
 import edu.uccs.summers.data.Person
 import edu.uccs.summers.data.dto.HasDTO
 import edu.uccs.summers.data.dto.geometry.{Area => AreaDTO}
+import edu.uccs.summers.data.geometry.util.VisionListener
 import edu.uccs.summers.data.population.InitialPopulationParameters
 import edu.uccs.summers.data.population.PopulationFactory
-import org.jbox2d.callbacks.ContactListener
-import org.jbox2d.dynamics.contacts.Contact
-import org.jbox2d.callbacks.ContactImpulse
-import org.jbox2d.collision.Manifold
+import org.jbox2d.callbacks.RayCastCallback
+import org.jbox2d.dynamics.Fixture
 
 class Area(val name : String, val boundingShape : AreaBounds, val objects : List[StaticEntity], val pop : immutable.Set[Person], rnd : Random) extends Serializable with HasDTO[AreaDTO]{
   
   private var world : World = null
+  private var elapsedTime : Float = 0
   
   def initialize(){
     world = new World(new Vec2(0f, 0f))
     boundingShape.init(world)
     objects.foreach(_.init(world))
     pop.foreach(_.init(world, this))
-    world.setContactListener(new ContactListener(){
-      def beginContact(contact : Contact) = {
-        (contact.getFixtureA().getBody().getUserData(), contact.getFixtureB().getUserData()) match {
-          case (a : Person, b : Person) => {
-            a.addVisualContact(b)
-          }
-          case _ => {}
-        }
-        (contact.getFixtureA().getUserData(), contact.getFixtureB().getBody().getUserData()) match {
-          case (a : Person, b : Person) => {
-            a.addVisualContact(b)
-          }
-          case _ => {}
-        }
-      }
-    
-      def endContact(contact : Contact) = {
-        (contact.getFixtureA().getBody().getUserData(), contact.getFixtureB().getUserData()) match {
-          case (a : Person, b : Person) => {
-            a.removeVisualContact(b)
-          }
-          case _ => {}
-        }
-        (contact.getFixtureA().getUserData(), contact.getFixtureB().getBody().getUserData()) match {
-          case (a : Person, b : Person) => {
-            a.removeVisualContact(b)
-          }
-          case _ => {}
-        }
-      }
-
-      def preSolve(contact : Contact, oldManifold : Manifold) = {
-        
-      }
-    
-      def postSolve(contact : Contact, impulse : ContactImpulse) = {
-        
-      }
-    })
+    world.setContactListener(new VisionListener)
   }
+  
   def generateSpawnPoint() : Vec2 = {
     boundingShape.shape.generatePointWithin(Area.rnd)
   }
   
   def update() = {
     pop.foreach(_.update(this, pop))
-    for(i <- 0 to 60){
+    for(i <- 0 to 5){
       world.step(1/60.0f, 3, 12)
+      pop.foreach(person => {
+        var filter = raycastFilter(person)(_)
+        person.visualContacts = person.visualContacts.filter(filter)
+      })
     }
+    elapsedTime += 1/6f
   }
 
   def translate() : AreaDTO = {
-    new AreaDTO(name, boundingShape.translate, objects.map(_.translate), pop.map(_.translate))
+    new AreaDTO(name, boundingShape.translate, objects.map(_.translate), pop.map(_.translate), elapsedTime)
+  }
+  
+  private def raycastFilter(person : Person)(contact : Person): Boolean = {
+    var closestPerson : Person = null
+    world.raycast(new RayCastCallback{
+      var closest : Float = Float.MaxValue
+      override def reportFixture(fixture : Fixture, point : Vec2, normal : Vec2, fraction : Float) : Float = {
+        fixture.getUserData() match {
+          case w : Wall => {
+            if(fraction < closest){
+              closest = fraction
+              closestPerson = null
+            }
+            return fraction
+          }
+          case p : Person => {
+            if(fraction < closest){
+              closest = fraction
+              closestPerson = p
+            }
+          }
+          case _ => {}
+        }
+        return -1f
+      }
+    }, person.body.getPosition(), contact.body.getPosition())
+    val result = closestPerson != null && closestPerson == contact
+    result
   }
 }
 
@@ -89,7 +85,7 @@ object Area{
       val count = if(maxPop == minPop) minPop else rnd.nextInt(maxPop - minPop) + minPop
       val fixmeType = popParams.popTypes.head
       val pop = mutable.Set[Person]()
-      0 to count foreach (i => {
+      0 to (count-1) foreach (i => {
         pop += PopulationFactory.createPerson(name + "_" + i, fixmeType)
       })
       pop.toSet

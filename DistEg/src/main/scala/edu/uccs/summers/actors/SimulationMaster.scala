@@ -72,7 +72,9 @@ class SimulationMaster() extends Actor{
     }
     
     case SimulationStepExecutionComplete(geometry) => {
+      import context.dispatcher
       listeners.foreach(_ ! SimulationStepResult(geometry))
+      if (run) schedule = context.system.scheduler.scheduleOnce(simulationSpeed, self, SimulationStepRequest)
     }
     
     case SimulationStart => {
@@ -90,9 +92,7 @@ class SimulationMaster() extends Actor{
     }
     
     case SimulationStepRequest => {
-      import context.dispatcher
       geometry.areas.foreach(area => popExecs ! Compute(popAggregator))
-      if (run) schedule = context.system.scheduler.scheduleOnce(simulationSpeed, self, SimulationStepRequest)
     }
     
     case SimulationSpeed(newDuration) => {
@@ -104,6 +104,7 @@ class SimulationMaster() extends Actor{
     }
     
     case RemoveSimulationListener(listener) => {
+      println("Simulation Master removed listener");
       removeSimulationListener(listener)
     }
   }
@@ -120,7 +121,7 @@ class SimulationMaster() extends Actor{
     popAggregator = null
     
     val behaviorsParser = new BehaviorsParser(new ParsingContext)
-    behaviorsParser.bind("RandomWalk", new RandomWalk)
+    behaviorsParser.bind("RandomWalk", RandomWalk)
     behaviorsParser.bind("Idle", Idle)
     behaviorsParser.bind("MoveDirect", new MoveDirect)
     behaviorsParser.parseAll(behaviorsParser.behaviorListing, Source.fromFile(initData.behaviorsFile).bufferedReader) match {

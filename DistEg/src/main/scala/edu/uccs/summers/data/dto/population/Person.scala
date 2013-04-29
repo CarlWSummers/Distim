@@ -10,36 +10,45 @@ import scala.collection.mutable.ListBuffer
 import java.awt.geom.Path2D
 import java.awt.Paint
 import java.awt.AlphaComposite
+import java.awt.BasicStroke
 
-class Person(val position : Vec2, 
-             val velocity : Vec2, 
-             val angle : Float, 
-             val visualRange : Float, 
-             val visualFOV : Float, 
-             val contacts : List[Vec2],
+class Person(val position : Vec2, // World Coordinates
+             val velocity : Vec2, // In Meters / Sec
+             val angle : Float, // In Radians
+             val visualRange : Float, // Meters
+             val visualFOV : Float, // Degrees on either side of 0
+             val contacts : List[Vec2], // List of locations where someone is seen
              val color : Color ) extends DTOType {
 
+  private val worldRadius = 0.5 // Half a meter radius
+  
   def draw(g : Graphics2D, convertScalar : Float => Float, convertVec2 : Vec2 => Vec2) = {
-    val pixelPos = convertVec2(position)
-    val radius = convertScalar(.50f)
-    val diameter = 2 * radius
-    val shape = new Ellipse2D.Float(-radius, -radius, diameter, diameter)
     
-    val oldTransform = g.getTransform
-    val oldComposite = g.getComposite();
+    val newContext = g.create().asInstanceOf[Graphics2D]
+    
+    val pixelPos = convertVec2(position)
+    newContext.translate(pixelPos.x, pixelPos.y)
+    
+    drawContactIndicators(newContext, contacts.map(position.sub).map(convertVec2))
+    drawBody(newContext, convertVec2, convertScalar);
+    drawRotationIndicator(newContext, convertVec2, convertScalar)
+    drawVisualRange(newContext, convertScalar)
+  }
 
-    g.translate(pixelPos.x, pixelPos.y)
+  def drawContactIndicators(g : Graphics2D, contacts : List[Vec2]){
     g.setColor(color)
-    g.fill(shape)
-    g.setColor(Color.GREEN)
-    val pixelVelocity = convertVec2(velocity)
-    g.draw(new Line2D.Float(0, 0, pixelVelocity.x, pixelVelocity.y))
-    g.setColor(Color.RED)
-    g.rotate(angle.toDouble)
-    g.draw(new Line2D.Float(0, 0, 0, -radius))
+    val stroke = g.getStroke()
+    g.setStroke(new BasicStroke(.1f))
+    contacts.foreach(contact => {
+      g.draw(new Line2D.Float(0, 0, -contact.x, -contact.y))
+    })
+    g.setStroke(stroke)
+  }
+  
+  def drawVisualRange(g : Graphics2D, convertScalar : Float => Float) {
+    val composite = g.getComposite()
     
     val visualRangePixel = convertScalar(visualRange)
-    g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f))
     val poly = new Path2D.Float()
     poly.moveTo(0, 0)
     val segments = 16
@@ -48,20 +57,45 @@ class Person(val position : Vec2,
       poly.lineTo(visualRangePixel * math.cos(angle).toFloat, -(visualRangePixel * math.sin(angle).toFloat));
     })
     poly.closePath()
+    
+    val transform = g.getTransform()
+    g.rotate(angle.toDouble)
+    g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f))
+    g.setColor(new Color(0, 10, 120))
+    g.draw(poly)
+    g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.2f))
+    g.setColor(new Color(0, 80, 255))
     g.fill(poly)
     
-    g.setComposite(oldComposite)
-    g.setTransform(oldTransform)
+    g.setTransform(transform)
+    
+    g.setComposite(composite)
+  }
+  
+  def drawBody(g : Graphics2D, convertVec2 : Vec2 => Vec2, convertScalar : Float => Float) {
+    val radius = convertScalar(.50f)
+    val diameter = 2 * radius
+    val shape = new Ellipse2D.Float(-radius, -radius, diameter, diameter)
 
     g.setColor(color)
-    contacts.map(convertVec2(_)).foreach(contact => {
-      g.draw(new Line2D.Float(contact.x, contact.y, pixelPos.x, pixelPos.y))
-      val trans = g.getTransform()
-      g.translate(contact.x, contact.y)
-      g.draw(new Line2D.Double(0, 0, math.cos(math.toRadians(160)) * 5, math.sin(math.toRadians(200)) * 5))
-      g.setTransform(trans)
-    })
-    
+    g.fill(shape)
+  }
+  
+  def drawRotationIndicator(g : Graphics2D, convertVec2 : Vec2 => Vec2, convertScalar : Float => Float) {
+    val stroke = g.getStroke()
+    g.setStroke(new BasicStroke(.5f))
 
+    val radius = convertScalar(.50f)
+    val pixelVelocity = convertVec2(velocity)
+    g.setColor(Color.GREEN)
+    g.draw(new Line2D.Float(0, 0, pixelVelocity.x, pixelVelocity.y))
+    g.setColor(Color.RED)
+    
+    val transform = g.getTransform()
+    g.rotate(angle.toDouble)
+    g.draw(new Line2D.Float(0, 0, 0, -radius))
+    g.setTransform(transform)
+    
+    g.setStroke(stroke)
   }
 }

@@ -37,7 +37,7 @@ class Wall(shape : Shape) extends StaticEntity(shape) with Serializable {
     
     val fixDef : FixtureDef = new FixtureDef
     fixDef.shape = shape.createCollidable
-    body.createFixture(fixDef)
+    body.createFixture(fixDef).setUserData(this)
   }
   
 //  override def draw(g : Graphics2D, convertScalar : Float => Float, convertVec2 : Vec2 => Vec2) : Unit = {

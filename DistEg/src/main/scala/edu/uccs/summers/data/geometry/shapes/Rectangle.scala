@@ -17,8 +17,8 @@ class Rectangle(val ul : Vec2, val width : Float, val height : Float) extends Sh
   }
   
   def generatePointWithin(rnd : Random) : Vec2 = {
-    val x = ul.x + rnd.nextInt(width.toInt - 1)
-    val y = ul.y - rnd.nextInt(height.toInt - 1)
+    val x = math.max(ul.x + (rnd.nextFloat * (width - 1)), ul.x + 1) //rnd.nextInt(width.toInt - 1) + 1
+    val y = ul.y - (rnd.nextFloat * (height - 1)) - 1 //rnd.nextInt(height.toInt - 1) - 1
     new Vec2(x,y)
   }
   

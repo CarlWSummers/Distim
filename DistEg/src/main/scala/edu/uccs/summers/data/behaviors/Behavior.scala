@@ -1,9 +1,10 @@
 package edu.uccs.summers.data.behaviors
 
 import scala.util.Random
+
 import edu.uccs.summers.data.Person
-import edu.uccs.summers.data.geometry.Geometry
 import edu.uccs.summers.data.geometry.Area
+import edu.uccs.summers.data.geometry.Geometry
 
 
 class Behavior (val name : String, val states : List[State]) extends Serializable{
@@ -16,6 +17,10 @@ class Behavior (val name : String, val states : List[State]) extends Serializabl
 
 class BehaviorExecutor(val behavior : Behavior) extends Serializable {
   import BehaviorExecutor.{badState, nullState}
+  
+//  val behavior = new Behavior(b.name, b.states.map(state => {
+//    
+//  }))
   
   var currentState : State = (nullState /: behavior.states)((a, b) => 
     if(a != nullState && b.initial) 
@@ -33,7 +38,7 @@ class BehaviorExecutor(val behavior : Behavior) extends Serializable {
     ctx.bind("Random", Random)
     
     try{
-      currentState.transitions.find(_(ctx)).map(t => 
+      currentState.transitions.find(_(ctx)).foreach(t => 
         currentState = behavior.stateOf(t.destinationState, badState))
     } catch {
       case e : Exception => {

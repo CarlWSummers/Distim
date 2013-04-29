@@ -21,9 +21,14 @@ import edu.uccs.summers.data.geometry.Area
 import edu.uccs.summers.data.population.PhysicalProperties
 import org.jbox2d.collision.shapes.PolygonShape
 import scala.collection.mutable.ListBuffer
+import scala.annotation.tailrec
 
 case class Person(val id : String, private var _executor : BehaviorExecutor, dynamics : PhysicalProperties) extends Serializable with HasDTO[PersonDTO]{
 
+  val VisualRange = 10
+  val FOV = 260f
+  val MaxVelocity = 4; //m/s
+  
   var visualContacts = ListBuffer[Person]()
   var body : Body = null
   
@@ -51,13 +56,11 @@ case class Person(val id : String, private var _executor : BehaviorExecutor, dyn
     visionFixtureDef.isSensor = true
     val sensor = new PolygonShape
     val sensorPoints = ListBuffer[Vec2](new Vec2(0,0))
-    val range = 10f
-    val fov = 160f
     val segments = 7
     0 to segments-1 foreach (i => {
-      val angle = math.toRadians((i / (segments-1).toFloat * fov) + ((180 - fov) / 2))
-      val x = range * math.cos(angle).toFloat
-      val y = range * math.sin(angle).toFloat 
+      val angle = math.toRadians((i / (segments-1).toFloat * FOV) + ((180 - FOV) / 2))
+      val x = VisualRange * math.cos(angle).toFloat
+      val y = VisualRange * math.sin(angle).toFloat 
       sensorPoints += new Vec2(x, y);
     })
     sensor.set(sensorPoints.toArray, sensorPoints.size)
@@ -88,20 +91,21 @@ case class Person(val id : String, private var _executor : BehaviorExecutor, dyn
   def color = _color
   def color_= (value : Color) = _color = value
   
-  def findSpawnPoint(area : Area, world : World) : Vec2 = {
+  @tailrec
+  final def findSpawnPoint(area : Area, world : World) : Vec2 = {
     val potentialPoint = area.generateSpawnPoint
-    val aabb = new AABB(new Vec2(potentialPoint.x - .75f, potentialPoint.y - .75f), new Vec2(potentialPoint.x + .75f, potentialPoint.y + .75f))
+    val aabb = new AABB(new Vec2(potentialPoint.x - .50f, potentialPoint.y - .50f), new Vec2(potentialPoint.x + .50f, potentialPoint.y + .50f))
     var collision = false
     world.queryAABB(new QueryCallback{
      def reportFixture(fixture : Fixture) : Boolean = {
-       collision = true
-       return false
+       collision = fixture.isSensor()
+       return collision
      }
     }, aabb)
     if(!collision) return potentialPoint else return findSpawnPoint(area, world)
   }
 
   def translate() : PersonDTO = {
-    new PersonDTO(body.getPosition(), body.getLinearVelocity(), body.getAngle(), 10, 160, visualContacts.map(_.body.getPosition).toList, color)
+    new PersonDTO(body.getPosition(), body.getLinearVelocity(), body.getAngle(), VisualRange, FOV, visualContacts.map(_.body.getPosition).toList, color)
   }
 }

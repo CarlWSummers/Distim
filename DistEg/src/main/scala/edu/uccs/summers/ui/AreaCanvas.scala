@@ -66,6 +66,10 @@ class AreaCanvas extends Panel {
     background = Color.BLACK
     super.paintComponent(g)
     if(area == null) return
+    
+    g.setColor(Color.WHITE)
+    g.drawString("Elapsed Time : " + "%.2f seconds".format(area.elapsedTime), 3, size.height - 3)
+    
     val m = g.getTransform()
     
     g.translate(size.width / 2, size.height / 2)

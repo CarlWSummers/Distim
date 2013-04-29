@@ -5,7 +5,7 @@ import java.awt.Graphics2D
 import org.jbox2d.common.Vec2
 import edu.uccs.summers.data.dto.population.Person
 
-class Area(val name : String, val areaBounds : AreaBounds, val objects : List[StaticEntity], val pop : Set[Person]) extends DTOType {
+class Area(val name : String, val areaBounds : AreaBounds, val objects : List[StaticEntity], val pop : Set[Person], val elapsedTime : Float) extends DTOType {
 
   val bgColor = areaBounds.getColor
   
