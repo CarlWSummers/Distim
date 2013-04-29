@@ -9,7 +9,7 @@ import edu.uccs.summers.data.population.PhysicalProperties
 class Action (val parentAction : Option[Action], val body : String) extends Serializable{
   
   def perform(ctx : ExecutionContext) : Person = {
-    var person = ctx.dereference("person").asInstanceOf[Person]
+    var person = ctx.dereference("person").get.asInstanceOf[Person]
     if(parentAction.isDefined) {
       ctx.bind("person", person)
       return parentAction.get.perform(ctx)
@@ -19,14 +19,13 @@ class Action (val parentAction : Option[Action], val body : String) extends Seri
 }
 
 case object RandomWalk extends Action(None, "") {
-  val seekPoint = new Vec2(0,0)
-  val maxVariation = 20
-  val inhibitingCircleRadius = .5f
-  
   override def perform(ctx : ExecutionContext) : Person = {
-    val p = ctx.dereference("person").asInstanceOf[Person]
-    val rnd = ctx.dereference("Random").asInstanceOf[Random]
+    val p = ctx.dereference("person").get.asInstanceOf[Person]
+    val rnd = ctx.dereference("Random").get.asInstanceOf[Random]
     
+    val seekPoint = ctx.dereference("SeekPoint", new Vec2(0,0)).asInstanceOf[Vec2]
+    val maxVariation = ctx.dereference("MaxVariation", 20f).asInstanceOf[Float]
+    val inhibitingCircleRadius = ctx.dereference("InhibitingCircleRadius", 2f).asInstanceOf[Float]
     val vector = new Vec2(
       if(rnd.nextBoolean) rnd.nextInt() else -1 * rnd.nextInt(),
       if(rnd.nextBoolean) rnd.nextInt() else -1 * rnd.nextInt())
@@ -47,8 +46,10 @@ case object RandomWalk extends Action(None, "") {
 
 case class Seek(dest : Vec2) extends Action(None, "") {
   override def perform(ctx : ExecutionContext) : Person = {
-    val p = ctx.dereference("person").asInstanceOf[Person]
-
+    println("Seeking! : " + dest)
+    
+    val p = ctx.dereference("person").get.asInstanceOf[Person]
+    
     val currentHeading = Utils.headingInDegrees(p.body.getLinearVelocity())
     val courseToTarget = Utils.headingInDegrees(Utils.course(p.body.getPosition(), dest))
     val difference = courseToTarget - currentHeading
@@ -62,7 +63,7 @@ case class Seek(dest : Vec2) extends Action(None, "") {
 
 case object Follow extends Action(None, "") {
   override def perform(ctx : ExecutionContext) : Person = {
-    val p = ctx.dereference("person").asInstanceOf[Person]
+    val p = ctx.dereference("person").get.asInstanceOf[Person]
     
     if(p.visualContacts.isEmpty) return RandomWalk.perform(ctx)
     val contactTuples = p.visualContacts.map(p => (p, p.body.getPosition().sub(p.visualContacts.head.body.getPosition()).length()))

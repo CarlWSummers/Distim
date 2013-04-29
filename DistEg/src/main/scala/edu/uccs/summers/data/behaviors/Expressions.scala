@@ -149,7 +149,7 @@ case class Not(unary : Expression) extends BooleanExpression {
 
 case class VariableExpression(value : String) extends Expression {
   override def apply(ctx : ExecutionContext) : Expression = {
-    ctx.dereference(value) match {
+    ctx.dereference(value).get match {
       case i : Int => NumericExpression(i)
       case d : Double => NumericExpression(d)
       case s : String => StringExpression(s)

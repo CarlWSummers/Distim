@@ -30,7 +30,7 @@ class BehaviorExecutor(val behavior : Behavior) extends Serializable {
   if(currentState == nullState) throw new Exception("No initial state set for " + behavior.name + " behavior")
   
   def execute(area : Area, pop : Set[Person], p : Person) : Person = {
-    val ctx = ExecutionContext(None)
+    val ctx = p.execContext
     ctx.bind("person", p)
     ctx.bind("area", area)
     ctx.bind("population", pop)

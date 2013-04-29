@@ -22,12 +22,14 @@ import edu.uccs.summers.data.population.PhysicalProperties
 import org.jbox2d.collision.shapes.PolygonShape
 import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
+import edu.uccs.summers.data.behaviors.ExecutionContext
 
 case class Person(val id : String, private var _executor : BehaviorExecutor, dynamics : PhysicalProperties) extends Serializable with HasDTO[PersonDTO]{
 
   val VisualRange = 10
   val FOV = 260f
   val MaxVelocity = 4; //m/s
+  val execContext = new ExecutionContext(null)
   
   var visualContacts = ListBuffer[Person]()
   var body : Body = null

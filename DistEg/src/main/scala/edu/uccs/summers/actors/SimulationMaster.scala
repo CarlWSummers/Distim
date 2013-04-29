@@ -42,6 +42,7 @@ import akka.actor.Cancellable
 import edu.uccs.summers.messages.SimulationStop
 import edu.uccs.summers.messages.SimulationSpeed
 import edu.uccs.summers.messages.RemoveSimulationListener
+import edu.uccs.summers.data.behaviors.Follow
 
 class SimulationMaster() extends Actor{
   
@@ -124,6 +125,7 @@ class SimulationMaster() extends Actor{
     behaviorsParser.bind("RandomWalk", RandomWalk)
     behaviorsParser.bind("Idle", Idle)
     behaviorsParser.bind("MoveDirect", new MoveDirect)
+    behaviorsParser.bind("Follow", Follow)
     behaviorsParser.parseAll(behaviorsParser.behaviorListing, Source.fromFile(initData.behaviorsFile).bufferedReader) match {
       case behaviorsParser.Success(r, t) => 
         r.foreach(b => behaviors += (b.name -> b))

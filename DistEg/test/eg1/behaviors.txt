@@ -1,27 +1,6 @@
 def behavior BehaviorTest {
   def initial state Walking {
     transitions : {}
-    action : RandomWalk {}
-  }
-}
-
-def behavior Undecided {
-  def initial state Walking {
-    transitions : {}
-    action : RandomWalk {}
-  }
-}
-
-def behavior Elvis {
-  def initial state LeavingTheBuilding {
-    transitions : {}
-    action : RandomWalk {}
-  }
-}
-
-def behavior AnotherBehavior {
-  def initial state Walking {
-    transitions : {}
-    action : RandomWalk {}
+    action : Follow {}
   }
 }
