@@ -1,12 +1,16 @@
 package edu.uccs.summers.data
 
 import java.awt.Color
-import java.awt.Graphics2D
-import java.awt.geom.Ellipse2D
-import java.awt.geom.Line2D
+
+import scala.annotation.tailrec
+import scala.collection._
+import scala.collection.mutable.ListBuffer
+import scala.util.Random
+
 import org.jbox2d.callbacks.QueryCallback
 import org.jbox2d.collision.AABB
 import org.jbox2d.collision.shapes.CircleShape
+import org.jbox2d.collision.shapes.PolygonShape
 import org.jbox2d.common.Vec2
 import org.jbox2d.dynamics.Body
 import org.jbox2d.dynamics.BodyDef
@@ -14,15 +18,13 @@ import org.jbox2d.dynamics.BodyType
 import org.jbox2d.dynamics.Fixture
 import org.jbox2d.dynamics.FixtureDef
 import org.jbox2d.dynamics.World
+
 import edu.uccs.summers.data.behaviors.BehaviorExecutor
+import edu.uccs.summers.data.behaviors.ExecutionContext
 import edu.uccs.summers.data.dto.HasDTO
 import edu.uccs.summers.data.dto.population.{Person => PersonDTO}
 import edu.uccs.summers.data.geometry.Area
 import edu.uccs.summers.data.population.PhysicalProperties
-import org.jbox2d.collision.shapes.PolygonShape
-import scala.collection.mutable.ListBuffer
-import scala.annotation.tailrec
-import edu.uccs.summers.data.behaviors.ExecutionContext
 
 case class Person(val id : String, private var _executor : BehaviorExecutor, dynamics : PhysicalProperties) extends Serializable with HasDTO[PersonDTO]{
 
@@ -30,6 +32,8 @@ case class Person(val id : String, private var _executor : BehaviorExecutor, dyn
   val FOV = 260f
   val MaxVelocity = 4; //m/s
   val execContext = new ExecutionContext(null)
+  execContext.bind("rnd", Person.random)
+  execContext.bind("Random", Person.random)
   
   var visualContacts = ListBuffer[Person]()
   var body : Body = null
@@ -71,6 +75,10 @@ case class Person(val id : String, private var _executor : BehaviorExecutor, dyn
     
   }
   
+  def terminate(world : World) = {
+    world.destroyBody(body)
+  }
+  
   def addVisualContact(contact : Person) = {
     visualContacts += contact
   }
@@ -79,8 +87,8 @@ case class Person(val id : String, private var _executor : BehaviorExecutor, dyn
     visualContacts -= contact
   }
   
-  def update(area : Area, pop : Set[Person]) = {
-    val newDynamics = _executor.execute(area, pop, this).dynamics
+  def update(area : Area, pop : mutable.Set[Person]) = {
+    val newDynamics = _executor.execute(area, pop.toSet, this).dynamics
     body.setLinearVelocity(newDynamics.velocity)
     body.setTransform(body.getPosition(), math.toRadians(newDynamics.angle).toFloat);
     body.setAngularVelocity(0)
@@ -110,4 +118,8 @@ case class Person(val id : String, private var _executor : BehaviorExecutor, dyn
   def translate() : PersonDTO = {
     new PersonDTO(body.getPosition(), body.getLinearVelocity(), body.getAngle(), VisualRange, FOV, visualContacts.map(_.body.getPosition).toList, color)
   }
+}
+
+object Person {
+  val random = new java.util.Random
 }

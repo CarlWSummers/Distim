@@ -94,7 +94,7 @@ class GeometryParser(popTypes : mutable.Map[String, PopulationArchetypeDescripto
   )
   
   def circleParameters : Parser[Circle] = ("center" ~> ":" ~> pointDesc) ~ ("radius" ~> ":" ~> wholeNumber) ^^ {
-    case center ~ radius => Circle(center, radius.toInt)
+    case center ~ radius => Circle(center, radius.toDouble)
   }
   
   def rectanglePointPoint = ("upper" ~ "left" ~> pointDesc) ~ ("to" ~ "lower" ~ "right" ~> pointDesc) ^^ {

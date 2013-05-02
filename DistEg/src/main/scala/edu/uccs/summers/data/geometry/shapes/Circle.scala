@@ -29,5 +29,5 @@ class Circle(val center : Vec2, val radius : Float) extends Shape {
 }
 
 object Circle {
-  def apply(center : Vec2, radius : Int) = new Circle(center, radius)
+  def apply(center : Vec2, radius : Double) = new Circle(center, radius.toFloat)
 }

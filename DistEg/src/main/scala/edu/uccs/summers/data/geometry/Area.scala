@@ -14,17 +14,18 @@ import edu.uccs.summers.data.population.PopulationFactory
 import org.jbox2d.callbacks.RayCastCallback
 import org.jbox2d.dynamics.Fixture
 
-class Area(val name : String, val boundingShape : AreaBounds, val objects : List[StaticEntity], val pop : immutable.Set[Person], rnd : Random) extends Serializable with HasDTO[AreaDTO]{
+class Area(val name : String, val boundingShape : AreaBounds, val objects : List[StaticEntity], val pop : mutable.Set[Person], rnd : Random) extends Serializable with HasDTO[AreaDTO]{
   
   private var world : World = null
   private var elapsedTime : Float = 0
+  private val contactListener = new VisionListener
   
   def initialize(){
     world = new World(new Vec2(0f, 0f))
     boundingShape.init(world)
     objects.foreach(_.init(world))
     pop.foreach(_.init(world, this))
-    world.setContactListener(new VisionListener)
+    world.setContactListener(contactListener)
   }
   
   def generateSpawnPoint() : Vec2 = {
@@ -39,12 +40,17 @@ class Area(val name : String, val boundingShape : AreaBounds, val objects : List
         var filter = raycastFilter(person)(_)
         person.visualContacts = person.visualContacts.filter(filter)
       })
+      contactListener.exitingPeople.foreach(person => {
+        person.terminate(world)
+        pop -= person
+      })
+      contactListener.clearExitingPeople
     }
     elapsedTime += 1/6f
   }
 
   def translate() : AreaDTO = {
-    new AreaDTO(name, boundingShape.translate, objects.map(_.translate), pop.map(_.translate), elapsedTime)
+    new AreaDTO(name, boundingShape.translate, objects.map(_.translate), pop.map(_.translate).toSet, elapsedTime)
   }
   
   private def raycastFilter(person : Person)(contact : Person): Boolean = {
@@ -88,7 +94,7 @@ object Area{
       0 to (count-1) foreach (i => {
         pop += PopulationFactory.createPerson(name + "_" + i, fixmeType)
       })
-      pop.toSet
+      pop
     }, rnd)
   }
 }

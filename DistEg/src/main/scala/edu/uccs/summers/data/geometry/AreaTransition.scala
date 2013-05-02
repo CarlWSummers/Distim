@@ -9,7 +9,7 @@ import edu.uccs.summers.data.dto.geometry.{AreaTransition => AreaTransitionDTO}
 class AreaTransition(name : String, s : Shape, destArea : String, destTransition : String) extends StaticEntity(s) with Serializable {
 
   def translate() : AreaTransitionDTO = {
-    new AreaTransitionDTO
+    new AreaTransitionDTO(destArea, destTransition, s)
   }
 }
 

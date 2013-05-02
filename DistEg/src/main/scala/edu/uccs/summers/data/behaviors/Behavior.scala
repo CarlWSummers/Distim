@@ -35,7 +35,6 @@ class BehaviorExecutor(val behavior : Behavior) extends Serializable {
     ctx.bind("area", area)
     ctx.bind("population", pop)
     ctx.bind("Population", pop)
-    ctx.bind("Random", Random)
     
     try{
       currentState.transitions.find(_(ctx)).foreach(t => 

@@ -10,7 +10,7 @@ case class ExecutionContext(parentContext : Option[ExecutionContext]) extends Se
   def unbind(s : String) = bindings -= s
   def dereference(s : String) : Option[Any] = {
     if(bindings.contains(s)) Some(bindings(s))
-    else if(parentContext.isDefined) parentContext.get.dereference(s)
+//    else if(parentContext.isDefined) parentContext.get.dereference(s)
     else None
   }
   

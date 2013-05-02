@@ -17,6 +17,7 @@ import edu.uccs.summers.data.dto.geometry.Area
 class AreaCanvas extends Panel {
 
   private var area : Area = null
+  private var elapsedRealTime : Long = 0
   
   private var translateX = 0.0
   private var translateY = 0.0
@@ -50,8 +51,9 @@ class AreaCanvas extends Panel {
     }
   }
 
-  def update(area : Area){
+  def update(area : Area, elapsedTime : Long){
     this.area = area
+    this.elapsedRealTime = elapsedTime
     repaint
   }
   
@@ -68,7 +70,8 @@ class AreaCanvas extends Panel {
     if(area == null) return
     
     g.setColor(Color.WHITE)
-    g.drawString("Elapsed Time : " + "%.2f seconds".format(area.elapsedTime), 3, size.height - 3)
+    g.drawString("Simulation Time : " + "%.2f seconds".format(area.elapsedTime), 3, size.height - 3)
+    g.drawString("      Real Time : " + "%d milliseconds".format(elapsedRealTime), 3, size.height - 23)
     
     val m = g.getTransform()
     

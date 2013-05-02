@@ -24,7 +24,7 @@ case object SimulationStepRequest extends SimulationMessage
 case object SimulationStart extends SimulationMessage
 case object SimulationStop extends SimulationMessage
 
-case class SimulationStepResult(g : GeometryDTO) extends SimulationMessage
+case class SimulationStepResult(g : GeometryDTO, elapsedTime : Long) extends SimulationMessage
 case class SimulationStepPartialResult(newArea : AreaDTO) extends SimulationMessage
 case class SimulationStepExecutionComplete(geometry : GeometryDTO) extends SimulationMessage
 case class Compute(resultDest : ActorRef) extends SimulationMessage

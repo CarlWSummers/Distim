@@ -29,7 +29,7 @@ class AreaTabPane(val actorSystem : ActorContext) extends BoxPanel(Orientation.V
   
   val areaToPageMap = mutable.Map[String, AreaCanvas]()
 
-  def update(geometry : Geometry){
+  def update(geometry : Geometry, elapsedTime : Long){
     for(area <- geometry.areas){
       if(!areaToPageMap.contains(area.name)){
         val canvas = new AreaCanvas
@@ -38,7 +38,7 @@ class AreaTabPane(val actorSystem : ActorContext) extends BoxPanel(Orientation.V
       }
       SwingUtilities.invokeLater(new Runnable{
         def run() {
-          areaToPageMap.get(area.name).get.update(area)
+          areaToPageMap.get(area.name).get.update(area, elapsedTime)
         }
       })
     }
@@ -57,8 +57,8 @@ class AreaTabPane(val actorSystem : ActorContext) extends BoxPanel(Orientation.V
 class AreaTabPaneSimulationListener(parent : AreaTabPane) extends Actor {
 
   def receive = {
-    case SimulationStepResult(geometry) => {
-      parent.update(geometry)
+    case SimulationStepResult(geometry, elapsedTime) => {
+      parent.update(geometry, elapsedTime)
     }
     
     case SimulationClear => {

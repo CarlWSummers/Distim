@@ -1,5 +1,16 @@
 def behavior BehaviorTest {
-  def initial state Walking {
+  def initial state Start {
+    transitions : {
+   	  Random.nextDouble() < .9 -> Random
+   	  true -> Follow
+    }
+    action : RandomWalk {}
+  }
+  def state Random {
+    transitions : {}
+    action : RandomWalk {}
+  }
+  def state Follow {
     transitions : {}
     action : Follow {}
   }

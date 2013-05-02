@@ -59,6 +59,8 @@ class SimulationMaster() extends Actor{
   var schedule : Cancellable = null
   var run = false
   var simulationSpeed = 1000 milliseconds
+  var elapsedTime = 0l
+  var stepStart = 0l
   
   def receive = {
     case SimulationInitialize(s) => {
@@ -74,7 +76,8 @@ class SimulationMaster() extends Actor{
     
     case SimulationStepExecutionComplete(geometry) => {
       import context.dispatcher
-      listeners.foreach(_ ! SimulationStepResult(geometry))
+      elapsedTime += System.currentTimeMillis() - stepStart
+      listeners.foreach(_ ! SimulationStepResult(geometry, elapsedTime))
       if (run) schedule = context.system.scheduler.scheduleOnce(simulationSpeed, self, SimulationStepRequest)
     }
     
@@ -93,6 +96,7 @@ class SimulationMaster() extends Actor{
     }
     
     case SimulationStepRequest => {
+      stepStart = System.currentTimeMillis()
       geometry.areas.foreach(area => popExecs ! Compute(popAggregator))
     }
     
@@ -120,6 +124,7 @@ class SimulationMaster() extends Actor{
     geometry = null
     popExecs = null
     popAggregator = null
+    elapsedTime = 0l
     
     val behaviorsParser = new BehaviorsParser(new ParsingContext)
     behaviorsParser.bind("RandomWalk", RandomWalk)

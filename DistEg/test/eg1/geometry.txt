@@ -1,9 +1,41 @@
 Area CollisionTest {
   Population {
-    Create 20 to 20 persons of types (Simple)
+    Create 99 to 99 persons of types (Simple)
   }
   
   Bounds {
-    upper left (-300,300) to lower right (300, -300)
+    upper left (-100,100) to lower right (100, -100)
+  }
+  
+  Transition { 
+  	Name
+  	circle 
+  	  center : (30,30)
+  	  radius : 30
+  	transition to TestTwo Name 
+  }
+  
+  Exit {
+    circle 
+      center : (-30, -30)
+      radius : 5
+  }
+}
+
+Area TestTwo {
+  Population {
+    Create 99 to 99 persons of types (Simple)
+  }
+  
+  Bounds {
+    upper left (-100,100) to lower right (100, -100)
+  }
+  
+  Transition { 
+  	Name
+  	circle
+  	  center : (0,0)
+  	  radius : 30
+  	transition to CollisionTest Name 
   }
 }
