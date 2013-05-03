@@ -18,13 +18,14 @@ class Area(val name : String, val boundingShape : AreaBounds, val objects : List
   
   private var world : World = null
   private var elapsedTime : Float = 0
-  private val contactListener = new VisionListener
+  private var contactListener : VisionListener = null
   
   def initialize(){
     world = new World(new Vec2(0f, 0f))
     boundingShape.init(world)
     objects.foreach(_.init(world))
     pop.foreach(_.init(world, this))
+    contactListener = new VisionListener
     world.setContactListener(contactListener)
   }
   

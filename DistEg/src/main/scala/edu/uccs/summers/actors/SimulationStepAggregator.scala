@@ -15,13 +15,16 @@ class SimulationStepAggregator(resultSize : Int) extends Actor {
   
   def receive = {
     case SimulationStepPartialResult(area) => {
+      println("Agregator received area : " + area.name)
       resultCount += 1
       areas += area
       if(resultCount == resultSize){
         val newGeometry = new Geometry(areas.toList)
         resultCount = 0
         areas.clear
+        println("Agregator sending complete")
         context.parent ! SimulationStepExecutionComplete(newGeometry)
+        println("Agregator finished sending complete")
       }
     }
   }

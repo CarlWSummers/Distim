@@ -16,7 +16,9 @@ class SimulationStepExecutor(val area : Area) extends Actor{
   def receive = {
     case Compute(responseDest) => {
       area.update
+      println("Sending Partial Result for area : " + area.name)
       responseDest ! SimulationStepPartialResult(area.translate)
+      println("Finished sending Partial Result for area : " + area.name)
     }
   }
 }

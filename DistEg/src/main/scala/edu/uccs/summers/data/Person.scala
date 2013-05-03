@@ -28,8 +28,8 @@ import edu.uccs.summers.data.population.PhysicalProperties
 
 case class Person(val id : String, private var _executor : BehaviorExecutor, dynamics : PhysicalProperties) extends Serializable with HasDTO[PersonDTO]{
 
-  val VisualRange = 10
-  val FOV = 260f
+  val VisualRange = 25
+  val FOV = 90f
   val MaxVelocity = 4; //m/s
   val execContext = new ExecutionContext(null)
   execContext.bind("rnd", Person.random)
@@ -64,7 +64,7 @@ case class Person(val id : String, private var _executor : BehaviorExecutor, dyn
     val sensorPoints = ListBuffer[Vec2](new Vec2(0,0))
     val segments = 7
     0 to segments-1 foreach (i => {
-      val angle = math.toRadians((i / (segments-1).toFloat * FOV) + ((180 - FOV) / 2))
+      val angle = math.toRadians((i / (segments-1).toFloat * FOV) + ((360 - FOV) / 2))
       val x = VisualRange * math.cos(angle).toFloat
       val y = VisualRange * math.sin(angle).toFloat 
       sensorPoints += new Vec2(x, y);

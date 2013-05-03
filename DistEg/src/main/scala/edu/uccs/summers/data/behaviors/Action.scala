@@ -63,7 +63,6 @@ case class Seek(dest : Vec2) extends Action(None, "") {
 
 case object Follow extends Action(None, "") {
   override def perform(ctx : ExecutionContext) : Person = {
-    println("Executing Follow Action")
     val p = ctx.dereference("person").get.asInstanceOf[Person]
     
     if(p.visualContacts.isEmpty) return RandomWalk.perform(ctx)

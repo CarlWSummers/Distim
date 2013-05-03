@@ -15,12 +15,15 @@ Area CollisionTest {
   	transition to TestTwo Name 
   }
   
+  /*
   Exit {
     circle 
       center : (-30, -30)
       radius : 5
   }
+  */
 }
+
 
 Area TestTwo {
   Population {
@@ -39,3 +42,5 @@ Area TestTwo {
   	transition to CollisionTest Name 
   }
 }
+  /*
+  */

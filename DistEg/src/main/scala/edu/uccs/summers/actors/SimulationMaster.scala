@@ -67,6 +67,7 @@ class SimulationMaster() extends Actor{
       initSim(s) match {
         case InitSuccessful => {
           sender ! InitSuccessful
+          println("Sending Sim Clear Messages")
           listeners.foreach(_ ! SimulationClear)
           self ! SimulationStepRequest
         }
@@ -96,8 +97,10 @@ class SimulationMaster() extends Actor{
     }
     
     case SimulationStepRequest => {
+      println("Sending Sim Step Messages")
       stepStart = System.currentTimeMillis()
       geometry.areas.foreach(area => popExecs ! Compute(popAggregator))
+      println("Finished ending Sim Step Messages")
     }
     
     case SimulationSpeed(newDuration) => {
@@ -157,7 +160,12 @@ class SimulationMaster() extends Actor{
         return InitFailed("Failed to parse Geometry file:" + e)
     }
     
-    val execs = geometry.areas.map(area => context.actorOf(Props(new SimulationStepExecutor(area))))
+    val execs = geometry.areas.map(area =>{ 
+      println("Creating executor for area : " + area.name)
+      val actor = context.actorOf(Props(new SimulationStepExecutor(area)))
+      println("Finished creating executor for area : " + area.name)
+      actor
+    })
     popExecs = context.actorOf(Props().withRouter(RoundRobinRouter(routees = execs)))
     popAggregator = context.actorOf(Props(new SimulationStepAggregator(execs.size)))
     
