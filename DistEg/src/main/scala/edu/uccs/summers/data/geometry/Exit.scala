@@ -11,6 +11,8 @@ import org.jbox2d.dynamics.BodyDef
 import org.jbox2d.dynamics.Body
 import org.jbox2d.dynamics.BodyType
 import org.jbox2d.dynamics.FixtureDef
+import org.jbox2d.dynamics.Filter
+import edu.uccs.summers.data.Person
 
 class Exit(shape : Shape) extends StaticEntity(shape) with Serializable {
 
@@ -27,6 +29,10 @@ class Exit(shape : Shape) extends StaticEntity(shape) with Serializable {
     
     val fixDef : FixtureDef = new FixtureDef
     fixDef.shape = shape.createCollidable
+    fixDef.filter = new Filter
+    fixDef.filter.categoryBits = Exit.BODY_CATEGORY
+    fixDef.filter.maskBits = Person.BODY_CATEGORY
+    fixDef.isSensor = true
     body.createFixture(fixDef).setUserData(this)
   }
   
@@ -36,5 +42,6 @@ class Exit(shape : Shape) extends StaticEntity(shape) with Serializable {
 }
 
 object Exit{
+  val BODY_CATEGORY = 0x0010
   def apply(shape : Shape) = new Exit(shape)
 }

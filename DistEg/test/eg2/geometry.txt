@@ -1,23 +1,53 @@
 Area CollisionTest {
   Population {
-    Create 1000 to 1000 persons of types (Simple)
+    Create 10 to 10 persons of types (Simple)
   }
   
   Bounds {
-    upper left (-100,200) to lower right (200, -100)
-  }
- 
- /*
-  Wall {
-    rectangle upper left (0, 35) to lower right (35, 0)
+    upper left (0,100) with width 100 and height 100
   }
 
-  Wall {
-    circle center : (50, 50) radius : 35
+  Destination {
+  	LHSDestination
+  	rectangle upper left (1,100) with width 1 and height 100
   }
   
-  Wall {
-    polygon (-45, 65), (-35, 130), (0, 50)
+  Transition {
+    LHSTransition
+    rectangle upper left (0, 100) with width 1 and height 100
+    transition to CollisionTest RHSDestination
   }
-  */
+  
+  Destination {
+  	RHSDestination
+  	rectangle upper left (98,100) with width 1 and height 100
+  }
+  
+  Transition {
+    RHSTransition
+    rectangle upper left (99,100) with width 1 and height 100
+    transition to CollisionTest LHSDestination
+  }
+
+  Destination {
+  	TopDestination
+  	rectangle upper left (0,99) with width 100 and height 1
+  }
+  
+  Transition {
+    TopTransition
+    rectangle upper left (0,100) with width 100 and height 1
+    transition to CollisionTest BottomDestination
+  }
+  
+  Destination {
+  	BottomDestination
+  	rectangle upper left (0,3) with width 100 and height 2
+  }
+  
+  Transition {
+    BottomTransition
+    rectangle upper left (0,1) with width 100 and height 1
+    transition to CollisionTest TopDestination
+  }
 }

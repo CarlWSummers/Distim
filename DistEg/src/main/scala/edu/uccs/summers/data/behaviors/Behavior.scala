@@ -33,12 +33,12 @@ class BehaviorExecutor(val behavior : Behavior) extends Serializable {
     val ctx = p.execContext
     ctx.bind("person", p)
     ctx.bind("area", area)
-    ctx.bind("population", pop)
-    ctx.bind("Population", pop)
     
     try{
-      currentState.transitions.find(_(ctx)).foreach(t => 
-        currentState = behavior.stateOf(t.destinationState, badState))
+      synchronized{
+        currentState.transitions.find(_(ctx)).foreach(t => 
+          currentState = behavior.stateOf(t.destinationState, badState))
+      }
     } catch {
       case e : Exception => {
         e.printStackTrace()

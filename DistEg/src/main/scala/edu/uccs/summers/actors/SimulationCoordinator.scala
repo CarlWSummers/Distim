@@ -30,7 +30,6 @@ class SimulationCoordinator extends Actor {
   
   def receive = {
     case SimulationCreate(name) => {
-      println("Simulation create request received : " + name)
       if(simulations.contains(name)){
         sender ! SimulationReference(simulations(name))
       }else{
@@ -41,12 +40,10 @@ class SimulationCoordinator extends Actor {
     }
     
     case SimulationListing => {
-      println("Simulation listing request received")
       sender ! SimulationListingReponse(simulations.keySet.toSet)
     }
 
     case SimulationLookup(name) => {
-      println("Simulation lookup for '" + name + "' received")
       sender ! SimulationReference(simulations(name))
     }
     

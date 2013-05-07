@@ -1,6 +1,6 @@
 def behavior BehaviorTest {
   def initial state Walking {
     transitions : {}
-    action : Follow {}
+    action : RandomWalk {}
   }
 }

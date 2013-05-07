@@ -9,16 +9,20 @@ import java.awt.geom.Ellipse2D
 class Circle(val center : Vec2, val radius : Float) extends Shape {
   
   def draw(g : Graphics2D, convertScalar : Float => Float, convertVec2 : Vec2 => Vec2) = {
-    val worldCenter = convertVec2(center)
-    val worldRadius = convertScalar(radius)
-    val worldDiameter = worldRadius * 2
-    g.fill(new Ellipse2D.Float(worldCenter.x - worldRadius, worldCenter.y - worldRadius, worldDiameter, worldDiameter))
+    g.fill(getDrawable(convertScalar, convertVec2))
   }
   
   def generatePointWithin(rnd : Random) : Vec2 = {
     center
   }
     
+  override def getDrawable(convertScalar : Float => Float, convertVec2 : Vec2 => Vec2) : java.awt.Shape = {
+    val worldCenter = convertVec2(center)
+    val worldRadius = convertScalar(radius)
+    val worldDiameter = worldRadius * 2
+    new Ellipse2D.Float(worldCenter.x - worldRadius, worldCenter.y - worldRadius, worldDiameter, worldDiameter)
+  }
+  
   override def createCollidable = {
     val circle = new CircleShape
     circle.setRadius(radius)

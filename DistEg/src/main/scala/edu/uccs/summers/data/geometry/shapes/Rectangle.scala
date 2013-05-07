@@ -12,8 +12,12 @@ class Rectangle(val ul : Vec2, val width : Float, val height : Float) extends Sh
   val points = Seq(new Vec2(0,0), new Vec2(width, 0), new Vec2(width, -height), new Vec2(0, -height))
 
   override def draw(g : Graphics2D, convertScalar : Float => Float, convertVec2 : Vec2 => Vec2) = {
+    g.fill(getDrawable(convertScalar, convertVec2))
+  }
+  
+  override def getDrawable(convertScalar : Float => Float, convertVec2 : Vec2 => Vec2) : java.awt.Shape = {
     val pixelUL = convertVec2(ul)
-    g.fill(new Rectangle2D.Float(pixelUL.x, pixelUL.y, convertScalar(width), convertScalar(height)))
+    new Rectangle2D.Float(pixelUL.x, pixelUL.y, convertScalar(width), convertScalar(height))
   }
   
   def generatePointWithin(rnd : Random) : Vec2 = {

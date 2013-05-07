@@ -63,6 +63,7 @@ class GeometryParser(popTypes : mutable.Map[String, PopulationArchetypeDescripto
   def objectType = (
       ("Wall" ~> "{" ~> wallProperties) <~ "}"
     | ("Transition" ~> "{" ~> transitionProperties) <~ "}"
+    | ("Destination" ~> "{" ~> destinationProperties) <~ "}"
     | ("Exit" ~> "{" ~> exitProperties) <~ "}"
   )
   
@@ -76,6 +77,10 @@ class GeometryParser(popTypes : mutable.Map[String, PopulationArchetypeDescripto
   
   def transitionProperties = ident ~ shapeDef ~ transitionDef ^^ {
     case name ~ shape ~ destArea => AreaTransition(name, shape, destArea._1, destArea._2)
+  }
+  
+  def destinationProperties = ident ~ shapeDef ^^ {
+    case name ~ shape => new Destination(name, shape)
   }
   
   def transitionDef = ("transition" ~> "to" ~> ident) ~ ident ^^ {
@@ -102,7 +107,7 @@ class GeometryParser(popTypes : mutable.Map[String, PopulationArchetypeDescripto
   }
   
   def rectanglePointDimensions = 
-    ("starting" ~> "at" ~> pointDesc) ~ 
+    ("upper" ~> "left" ~> pointDesc) ~ 
     ("with" ~> "width" ~> wholeNumber) ~ 
     ("and" ~> "height" ~> wholeNumber) ^^ {
       case  point ~ width ~ height => Rectangle(point, width.toInt, height.toInt)

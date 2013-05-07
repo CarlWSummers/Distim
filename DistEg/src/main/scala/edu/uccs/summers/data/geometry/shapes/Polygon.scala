@@ -10,17 +10,23 @@ import java.awt.geom.Path2D
 class Polygon(val points : List[Vec2]) extends Shape {
   
   override def draw(g : Graphics2D, convertScalar : Float => Float, convertVec2 : Vec2 => Vec2) = {
-    val poly = new Path2D.Float()
-    val origin = convertVec2(getOrigin)
-    poly.moveTo(origin.x * 2, origin.y * 2)
-    points.tail.map(pnt => convertVec2(pnt)).foreach(pnt => poly.lineTo((pnt.x + origin.x).toInt, (pnt.y + origin.y).toInt))
-    poly.closePath()
-    g.fill(poly)
+    g.fill(getDrawable(convertScalar, convertVec2))
   }
   
   def generatePointWithin(rnd : Random) : Vec2 = {
     points.head
   }
+  
+  override def getDrawable(convertScalar : Float => Float, convertVec2 : Vec2 => Vec2) : java.awt.Shape = {
+    val poly = new Path2D.Float()
+    val origin = convertVec2(getOrigin)
+    poly.moveTo(origin.x * 2, origin.y * 2)
+    points.tail.map(pnt => convertVec2(pnt)).foreach(pnt => poly.lineTo((pnt.x + origin.x).toInt, (pnt.y + origin.y).toInt))
+    poly.closePath()
+    poly
+  }
+  
+
   
   override def getOrigin() = {
     points.head

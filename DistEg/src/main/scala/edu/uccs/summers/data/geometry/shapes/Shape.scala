@@ -9,4 +9,5 @@ abstract class Shape extends Serializable {
   def generatePointWithin(rnd : Random) : Vec2
   def getOrigin() : Vec2
   def createCollidable() : org.jbox2d.collision.shapes.Shape
+  def getDrawable(convertScalar : Float => Float, convertVec2 : Vec2 => Vec2) : java.awt.Shape
 }

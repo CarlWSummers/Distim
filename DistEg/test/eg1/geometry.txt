@@ -1,37 +1,52 @@
-Area CollisionTest {
+Area TestOne {
   Population {
-    Create 99 to 99 persons of types (Simple)
+    Create 10 to 10 persons of types (Simple)
   }
   
   Bounds {
-    upper left (-100,100) to lower right (100, -100)
+    upper left (-100, 100) with width 200 and height 200
+  }
+  
+  Exit {
+    rectangle upper left (-100, 10) with width 5 and height 20
+  }
+  
+  Destination {
+  	FromTestTwo
+  	rectangle upper left (95,100) with width 5 and height 20
+  }
+  
+  Destination {
+    FromTestThree
+    rectangle upper left (80, -95) with width 20 and height 5
+  }
+}
+
+Area TestTwo {
+  Population {
+    Create 20 to 20 persons of types (Simple)
+  }
+  
+  Bounds {
+    upper left (0,0) to lower right (200, -200)
   }
   
   Transition { 
   	Name
-  	circle 
-  	  center : (30,30)
+  	circle
+  	  center : (100,-100)
   	  radius : 30
-  	transition to TestTwo Name 
+  	transition to TestOne FromTestTwo 
   }
-  
-  /*
-  Exit {
-    circle 
-      center : (-30, -30)
-      radius : 5
-  }
-  */
 }
 
-
-Area TestTwo {
+Area TestThree {
   Population {
-    Create 99 to 99 persons of types (Simple)
+    Create 300 to 300 persons of types (Simple)
   }
   
   Bounds {
-    upper left (-100,100) to lower right (100, -100)
+    upper left (-200,200) to lower right (200, -200)
   }
   
   Transition { 
@@ -39,8 +54,8 @@ Area TestTwo {
   	circle
   	  center : (0,0)
   	  radius : 30
-  	transition to CollisionTest Name 
+  	transition to TestOne FromTestThree 
   }
 }
-  /*
-  */
+/*
+*/

@@ -1,0 +1,3 @@
+geometry : "test/eg3/geometry.txt"
+population : "test/eg3/population.txt"
+behaviors : "test/eg3/behaviors.txt"

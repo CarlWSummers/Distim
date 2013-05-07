@@ -4,22 +4,6 @@ import scala.collection.mutable.HashMap
 import scala.util.parsing.combinator.JavaTokenParsers
 import scala.util.parsing.combinator.PackratParsers
 
-import edu.uccs.summers.data.behaviors.interpreter.And
-import edu.uccs.summers.data.behaviors.interpreter.ArgumentListExpression
-import edu.uccs.summers.data.behaviors.interpreter.Equal
-import edu.uccs.summers.data.behaviors.interpreter.Expression
-import edu.uccs.summers.data.behaviors.interpreter.False
-import edu.uccs.summers.data.behaviors.interpreter.GreaterThan
-import edu.uccs.summers.data.behaviors.interpreter.LessThan
-import edu.uccs.summers.data.behaviors.interpreter.MemberAccessExpression
-import edu.uccs.summers.data.behaviors.interpreter.MemberInvocationExpression
-import edu.uccs.summers.data.behaviors.interpreter.Not
-import edu.uccs.summers.data.behaviors.interpreter.NumericExpression
-import edu.uccs.summers.data.behaviors.interpreter.Or
-import edu.uccs.summers.data.behaviors.interpreter.StringExpression
-import edu.uccs.summers.data.behaviors.interpreter.True
-import edu.uccs.summers.data.behaviors.interpreter.VariableExpression
-
 class BehaviorsParser(context : ParsingContext) extends JavaTokenParsers with PackratParsers{
   val bindings = new HashMap[String, Any]
   val stateMap = new HashMap[String, State]

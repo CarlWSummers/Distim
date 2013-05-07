@@ -1,11 +1,7 @@
-package edu.uccs.summers.data.behaviors.interpreter
+package edu.uccs.summers.data.behaviors
 
-import edu.uccs.summers.data.behaviors.ExecutionContext
-import edu.uccs.summers.data.behaviors.ExecutionContext
 import scala.math.Numeric
 import scala.math.Ordering
-import edu.uccs.summers.data.behaviors.ExecutionContext
-import edu.uccs.summers.data.behaviors.ExecutionContext
 
 trait Expression {
   def apply(ctx : ExecutionContext) : Any 
@@ -211,22 +207,29 @@ case class MemberAccessExpression(value : Expression, member : String) extends E
 case class MemberInvocationExpression(value : Expression, member : String, arguments : Option[ArgumentListExpression]) extends Expression {
   import scala.reflect.runtime.{universe => ru}
   
-  override def apply(ctx : ExecutionContext) : Expression = {
+  override def apply(ctx : ExecutionContext) : Expression = synchronized {
     val args = if(arguments.isDefined) Some(arguments.get(ctx)) else None
     val argTypes = if(args.isDefined) args.map(arg => getTypeTag(arg).tpe) else None
-    
     value(ctx) match {
       case v : Variable => {
-        val obj = v.apply(ctx)
-        val objMirror = ru.runtimeMirror(obj.getClass.getClassLoader()).reflect(obj)
-        val method = objMirror.symbol.typeSignature.member(ru.newTermName(member))
-        val result = objMirror.reflectMethod(method.asMethod)(args.getOrElse(List[Any]()) :_*)
-        Variable(result)
+        def thisIsBroken() : Variable = {
+          try{
+            val obj = v.apply(ctx)
+            val objMirror = ru.runtimeMirror(obj.getClass.getClassLoader()).reflect(obj)
+            val method = objMirror.symbol.typeSignature.member(ru.newTermName(member))
+            val result = objMirror.reflectMethod(method.asMethod)(args.getOrElse(List[Any]()) :_*)
+            Variable(result)
+          }catch{
+            case _:Throwable =>
+              thisIsBroken()
+          }
+        }
+        thisIsBroken()
       }
     }
   }
   
-  def getTypeTag[T: ru.TypeTag](obj: T) = ru.typeTag[T]
+  def getTypeTag[T: ru.TypeTag](obj: T) = synchronized {ru.typeTag[T]}
 }
 
 case class ArgumentListExpression(rest : Option[ArgumentListExpression], expr : Expression) extends Expression {

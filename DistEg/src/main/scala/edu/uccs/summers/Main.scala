@@ -13,7 +13,6 @@ import edu.uccs.summers.actors.SimulationMaster
 import edu.uccs.summers.data.behaviors.Action
 import edu.uccs.summers.data.behaviors.Behavior
 import edu.uccs.summers.data.behaviors.BehaviorsParser
-import edu.uccs.summers.data.behaviors.MoveDirect
 import edu.uccs.summers.data.behaviors.ParsingContext
 import edu.uccs.summers.data.behaviors.RandomWalk
 import edu.uccs.summers.ui.AreaTabPane
@@ -37,7 +36,7 @@ import edu.uccs.summers.messages.RemoveSimulationListener
 
 object Main extends SimpleSwingApplication{
   
-  val system = ActorSystem("DistEg", ConfigFactory.load().getConfig("remotelookup"))
+  val system = ActorSystem("DistEg", ConfigFactory.load().getConfig("client"))
   val host = JOptionPane.showInputDialog("Remote IP", "127.0.0.1")
   val port = JOptionPane.showInputDialog("Remote Port", "13552")
   val simCoordinator = system.actorFor("akka://SimulationCoordination@" + host + ":" + port+ "/user/coordinator")

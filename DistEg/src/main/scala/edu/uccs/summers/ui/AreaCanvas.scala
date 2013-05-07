@@ -2,17 +2,17 @@ package edu.uccs.summers.ui
 
 import java.awt.Color
 import java.awt.Graphics2D
-
 import scala.swing.Panel
 import scala.swing.event.MouseDragged
 import scala.swing.event.MouseEntered
 import scala.swing.event.MouseExited
 import scala.swing.event.MouseMoved
 import scala.swing.event.MouseWheelMoved
-
 import org.jbox2d.common.Vec2
-
 import edu.uccs.summers.data.dto.geometry.Area
+import java.awt.Font
+import java.awt.RenderingHints
+import scala.swing.event.MouseClicked
 
 class AreaCanvas extends Panel {
 
@@ -25,6 +25,8 @@ class AreaCanvas extends Panel {
   private var drawMouseCoords = false
   private var mouseX = 0
   private var mouseY = 0
+  private var showVisualContacts = false
+  private var showVisualRange = false
   
   focusable = false
   opaque = true
@@ -49,10 +51,23 @@ class AreaCanvas extends Panel {
       else scaleFactor *= modifier
       repaint
     }
+    case ev : MouseClicked => {
+      (showVisualContacts, showVisualRange) match {
+        case (true, true) => showVisualContacts = false; showVisualRange = false
+        case (false, false) => showVisualContacts = true; showVisualRange = false
+        case (true, false) => showVisualContacts = false; showVisualRange = true
+        case (false, true) => showVisualContacts = true; showVisualRange = true
+      }
+      area.drawVisualContacts = showVisualContacts
+      area.drawVisualRange = showVisualRange
+      repaint
+    }
   }
 
   def update(area : Area, elapsedTime : Long){
     this.area = area
+    area.drawVisualContacts = showVisualContacts
+    area.drawVisualRange = showVisualRange
     this.elapsedRealTime = elapsedTime
     repaint
   }
@@ -69,9 +84,15 @@ class AreaCanvas extends Panel {
     super.paintComponent(g)
     if(area == null) return
     
+    g.setRenderingHint(
+      RenderingHints.KEY_ANTIALIASING,
+      RenderingHints.VALUE_ANTIALIAS_ON)
+    g.setFont(new Font("Monospaced", Font.PLAIN, 12))
     g.setColor(Color.WHITE)
     g.drawString("Simulation Time : " + "%.2f seconds".format(area.elapsedTime), 3, size.height - 3)
-    g.drawString("      Real Time : " + "%d milliseconds".format(elapsedRealTime), 3, size.height - 23)
+    g.drawString("   Compute Time : " + "%d milliseconds".format(elapsedRealTime), 3, size.height - 23)
+    g.drawString("Area Population : " + area.pop.size, 3, size.height - 43)
+    
     
     val m = g.getTransform()
     

@@ -1,48 +1,44 @@
 package edu.uccs.summers.actors
 
-import scala.collection._
 import scala.collection.mutable
+import scala.concurrent.duration.DurationInt
 import scala.io.Source
 import scala.util.Random
 import akka.actor.Actor
 import akka.actor.ActorRef
+import akka.actor.Cancellable
 import akka.actor.Props
-import akka.actor.UntypedActorFactory
 import akka.actor.actorRef2Scala
 import akka.routing.RoundRobinRouter
-import edu.uccs.summers.data.geometry.Geometry
-import edu.uccs.summers.data.geometry.GeometryParser
-import edu.uccs.summers.data.Person
 import edu.uccs.summers.data.SimulationInitData
 import edu.uccs.summers.data.behaviors.Behavior
 import edu.uccs.summers.data.behaviors.BehaviorsParser
+import edu.uccs.summers.data.behaviors.Follow
 import edu.uccs.summers.data.behaviors.Idle
-import edu.uccs.summers.data.behaviors.MoveDirect
 import edu.uccs.summers.data.behaviors.ParsingContext
 import edu.uccs.summers.data.behaviors.RandomWalk
-import edu.uccs.summers.data.dto.geometry.{Geometry => GeometryDTO}
-import edu.uccs.summers.data.geometry.Area
+import edu.uccs.summers.data.geometry.Geometry
+import edu.uccs.summers.data.geometry.GeometryParser
 import edu.uccs.summers.data.population.PopulationArchetypeDescriptor
-import edu.uccs.summers.data.population.PopulationFactory
 import edu.uccs.summers.data.population.PopulationParser
 import edu.uccs.summers.messages.AddSimulationListener
 import edu.uccs.summers.messages.Compute
 import edu.uccs.summers.messages.InitFailed
 import edu.uccs.summers.messages.InitSuccessful
+import edu.uccs.summers.messages.RemoveSimulationListener
 import edu.uccs.summers.messages.SimulationClear
 import edu.uccs.summers.messages.SimulationInitializationResult
 import edu.uccs.summers.messages.SimulationInitialize
+import edu.uccs.summers.messages.SimulationSpeed
+import edu.uccs.summers.messages.SimulationStart
 import edu.uccs.summers.messages.SimulationStepExecutionComplete
 import edu.uccs.summers.messages.SimulationStepRequest
 import edu.uccs.summers.messages.SimulationStepResult
-import edu.uccs.summers.messages.Compute
-import edu.uccs.summers.messages.SimulationStart
-import scala.concurrent.duration._
-import akka.actor.Cancellable
 import edu.uccs.summers.messages.SimulationStop
-import edu.uccs.summers.messages.SimulationSpeed
-import edu.uccs.summers.messages.RemoveSimulationListener
-import edu.uccs.summers.data.behaviors.Follow
+import edu.uccs.summers.data.dto.geometry.TransitionEvent
+import akka.actor.UntypedActorFactory
+import akka.actor.UntypedActor
+import akka.remote.routing.RemoteRouterConfig
 
 class SimulationMaster() extends Actor{
   
@@ -52,6 +48,7 @@ class SimulationMaster() extends Actor{
   
   private var initialized = false
   private var geometry : Geometry = null
+  private var latestTransitioners : Set[TransitionEvent] = Set[TransitionEvent]()
   
   private var popExecs : ActorRef = null
   private var popAggregator : ActorRef = null
@@ -67,7 +64,6 @@ class SimulationMaster() extends Actor{
       initSim(s) match {
         case InitSuccessful => {
           sender ! InitSuccessful
-          println("Sending Sim Clear Messages")
           listeners.foreach(_ ! SimulationClear)
           self ! SimulationStepRequest
         }
@@ -75,8 +71,9 @@ class SimulationMaster() extends Actor{
       } 
     }
     
-    case SimulationStepExecutionComplete(geometry) => {
+    case SimulationStepExecutionComplete(geometry, transitioners) => {
       import context.dispatcher
+      latestTransitioners = transitioners
       elapsedTime += System.currentTimeMillis() - stepStart
       listeners.foreach(_ ! SimulationStepResult(geometry, elapsedTime))
       if (run) schedule = context.system.scheduler.scheduleOnce(simulationSpeed, self, SimulationStepRequest)
@@ -97,10 +94,8 @@ class SimulationMaster() extends Actor{
     }
     
     case SimulationStepRequest => {
-      println("Sending Sim Step Messages")
       stepStart = System.currentTimeMillis()
-      geometry.areas.foreach(area => popExecs ! Compute(popAggregator))
-      println("Finished ending Sim Step Messages")
+      geometry.areas.foreach(area => popExecs ! Compute(popAggregator, latestTransitioners))
     }
     
     case SimulationSpeed(newDuration) => {
@@ -112,12 +107,14 @@ class SimulationMaster() extends Actor{
     }
     
     case RemoveSimulationListener(listener) => {
-      println("Simulation Master removed listener");
       removeSimulationListener(listener)
     }
   }
   
   def initSim(initData : SimulationInitData) : SimulationInitializationResult = {
+    import scala.reflect.runtime.universe._
+    val v = implicitly[TypeTag[Random]]
+
     if(schedule != null){
       schedule.cancel
       schedule = null
@@ -132,7 +129,6 @@ class SimulationMaster() extends Actor{
     val behaviorsParser = new BehaviorsParser(new ParsingContext)
     behaviorsParser.bind("RandomWalk", RandomWalk)
     behaviorsParser.bind("Idle", Idle)
-    behaviorsParser.bind("MoveDirect", new MoveDirect)
     behaviorsParser.bind("Follow", Follow)
     behaviorsParser.parseAll(behaviorsParser.behaviorListing, Source.fromFile(initData.behaviorsFile).bufferedReader) match {
       case behaviorsParser.Success(r, t) => 
@@ -160,14 +156,14 @@ class SimulationMaster() extends Actor{
         return InitFailed("Failed to parse Geometry file:" + e)
     }
     
-    val execs = geometry.areas.map(area =>{ 
-      println("Creating executor for area : " + area.name)
-      val actor = context.actorOf(Props(new SimulationStepExecutor(area)))
-      println("Finished creating executor for area : " + area.name)
-      actor
-    })
-    popExecs = context.actorOf(Props().withRouter(RoundRobinRouter(routees = execs)))
-    popAggregator = context.actorOf(Props(new SimulationStepAggregator(execs.size)))
+    import akka.actor.{ Address, AddressFromURIString }
+    val addresses = Seq(
+    AddressFromURIString("akka://ComputeNode@localhost:4114"))
+
+    val factory = new ExecutorFactory(geometry.areas.map(_.name), initData)
+    popExecs = context.actorOf(Props(factory).withRouter(RoundRobinRouter(nrOfInstances = geometry.areas.size)))
+//    popExecs = context.actorOf(Props(factory).withRouter(RemoteRouterConfig(RoundRobinRouter(nrOfInstances = geometry.areas.size), addresses)))
+    popAggregator = context.actorOf(Props(new SimulationStepAggregator(geometry.areas.size)))
     
     initialized = true
     return InitSuccessful
@@ -181,4 +177,12 @@ class SimulationMaster() extends Actor{
     listeners.remove(listener)
   }
   
+}
+
+class ExecutorFactory(var areaNames : List[String], initData : SimulationInitData) extends UntypedActorFactory{
+  override def create() : SimulationStepExecutor = {
+    val area = areaNames.head
+    areaNames = areaNames.tail
+    return new SimulationStepExecutor(area, initData)
+  }
 }

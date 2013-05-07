@@ -1,0 +1,169 @@
+Area TestOne {
+  Population {
+    Create 500 to 500 persons of types (Simple)
+  }
+  
+  Bounds {
+    upper left (-100, 100) with width 200 and height 200
+  }
+  
+  Exit {
+    rectangle upper left (-100, 10) with width 5 and height 20
+  }
+  
+  Destination {
+  	FromTestTwo
+  	rectangle upper left (95,100) with width 5 and height 20
+  }
+  
+  Destination {
+    FromTestThree
+    rectangle upper left (80, -95) with width 20 and height 5
+  }
+}
+
+Area TestTwo {
+  Population {
+    Create 500 to 500 persons of types (Simple)
+  }
+  
+  Bounds {
+    upper left (0,0) to lower right (200, -200)
+  }
+  
+  Transition { 
+  	Name
+  	circle
+  	  center : (100,-100)
+  	  radius : 30
+  	transition to TestOne FromTestTwo 
+  }
+}
+
+Area TestThree {
+  Population {
+    Create 500 to 500 persons of types (Simple)
+  }
+  
+  Bounds {
+    upper left (-200,200) to lower right (200, -200)
+  }
+  
+  Transition { 
+  	Name
+  	circle
+  	  center : (0,0)
+  	  radius : 30
+  	transition to TestOne FromTestThree 
+  }
+}
+
+Area TestFour {
+  Population {
+    Create 500 to 500 persons of types (Simple)
+  }
+  
+  Bounds {
+    upper left (-200,200) to lower right (200, -200)
+  }
+  
+  Transition { 
+  	Name
+  	circle
+  	  center : (0,0)
+  	  radius : 5
+  	transition to TestOne FromTestThree 
+  }
+}
+
+Area TestFive {
+  Population {
+    Create 500 to 500 persons of types (Simple)
+  }
+  
+  Bounds {
+    upper left (-200,200) to lower right (200, -200)
+  }
+  
+  Transition { 
+  	Name
+  	circle
+  	  center : (0,0)
+  	  radius : 3
+  	transition to TestOne FromTestThree 
+  }
+}
+
+Area TestSix {
+  Population {
+    Create 500 to 500 persons of types (Simple)
+  }
+  
+  Bounds {
+    upper left (-200,200) to lower right (200, -200)
+  }
+  
+  Transition { 
+  	Name
+  	circle
+  	  center : (0,0)
+  	  radius : 3
+  	transition to TestOne FromTestThree 
+  }
+}
+
+Area TestSeven {
+  Population {
+    Create 500 to 500 persons of types (Simple)
+  }
+  
+  Bounds {
+    upper left (-200,200) to lower right (200, -200)
+  }
+  
+  Transition { 
+  	Name
+  	circle
+  	  center : (0,0)
+  	  radius : 3
+  	transition to TestOne FromTestThree 
+  }
+}
+
+Area TestEight {
+  Population {
+    Create 500 to 500 persons of types (Simple)
+  }
+  
+  Bounds {
+    upper left (-200,200) to lower right (200, -200)
+  }
+  
+  Transition { 
+  	Name
+  	circle
+  	  center : (0,0)
+  	  radius : 5
+  	transition to TestOne FromTestThree 
+  }
+}
+
+/*
+Area TestNine {
+  Population {
+    Create 400 to 400 persons of types (Simple)
+  }
+  
+  Bounds {
+    upper left (-200,200) to lower right (200, -200)
+  }
+  
+  Transition { 
+  	Name
+  	circle
+  	  center : (0,0)
+  	  radius : 4
+  	transition to TestOne FromTestThree 
+  }
+}
+*/
