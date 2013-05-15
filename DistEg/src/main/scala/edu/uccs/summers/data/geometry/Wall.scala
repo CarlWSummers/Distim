@@ -13,10 +13,8 @@ import org.jbox2d.dynamics.FixtureDef
 import java.awt.Graphics2D
 import org.jbox2d.dynamics.Body
 import org.jbox2d.common.Vec2
-import org.jbox2d.serialization.pb.PbSerializer
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
-import org.jbox2d.serialization.pb.PbDeserializer
 import edu.uccs.summers.data.dto.geometry.{Wall => WallDTO}
 
 class Wall(shape : Shape) extends StaticEntity(shape) with Serializable {

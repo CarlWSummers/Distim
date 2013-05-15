@@ -11,10 +11,8 @@ import edu.uccs.summers.data.geometry.shapes.Rectangle
 import java.awt.Graphics2D
 import org.jbox2d.common.Vec2
 import java.awt.geom.Line2D
-import org.jbox2d.serialization.pb.PbSerializer
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
-import org.jbox2d.serialization.pb.PbDeserializer
 import edu.uccs.summers.data.dto.geometry.{AreaBounds => AreaBoundsDTO}
 import edu.uccs.summers.data.dto.HasDTO
 
