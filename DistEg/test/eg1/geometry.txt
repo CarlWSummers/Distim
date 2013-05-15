@@ -49,6 +49,10 @@ Area TestThree {
     upper left (-200,200) to lower right (200, -200)
   }
   
+  Wall {
+    rectangle upper left (-100, 100) to lower right (0,0)
+  }
+  
   Transition { 
   	Name
   	circle

@@ -2,6 +2,7 @@ package edu.uccs.summers.data.behaviors
 
 import scala.math.Numeric
 import scala.math.Ordering
+import scala.util.Random
 
 trait Expression {
   def apply(ctx : ExecutionContext) : Any 
@@ -221,6 +222,7 @@ case class MemberInvocationExpression(value : Expression, member : String, argum
             Variable(result)
           }catch{
             case _:Throwable =>
+              Thread.sleep(Random.nextInt(1000))
               thisIsBroken()
           }
         }
